@@ -1,95 +1,131 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   Box, Card, CardContent, Typography, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, Button, Dialog,
-  DialogTitle, DialogContent, DialogActions, TextField, Grid,
-  Alert, Snackbar, Stack, Chip, IconButton, Tooltip,
+  TableHead, TableRow, Button, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, Grid, Alert, Snackbar, Stack,
+  Chip, IconButton, Tooltip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { targetDPs } from "../mockData";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import { AppContext } from "../context/AppContext";
+import PageHeader from "../components/PageHeader";
 
 const empty = { entityName: "", dpId: "", clientId: "", bank: "", ifsc: "", accountNo: "" };
 
+const LF = ({ label, children }) => (
+  <Box>
+    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", display: "block", mb: 0.5 }}>{label}</Typography>
+    {children}
+  </Box>
+);
+
 export default function TargetDPMaster() {
-  const [rows, setRows] = useState(targetDPs);
+  const { targetDPs, addTargetDP, approveTargetDP, deleteTargetDP } = useContext(AppContext);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(empty);
   const [snack, setSnack] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleAdd = () => {
-    setRows([...rows, { ...form, id: rows.length + 1, status: "Pending" }]);
+    addTargetDP(form);
     setForm(empty);
     setOpen(false);
-    setSnack("Target DP added — pending checker approval");
+    setSnack("Target DP added successfully — pending Checker approval");
   };
 
   const handleApprove = (id) => {
-    setRows(rows.map((r) => (r.id === id ? { ...r, status: "Active" } : r)));
-    setSnack("Target DP activated");
+    approveTargetDP(id);
+    setSnack("Target DP activated successfully");
   };
 
   const handleDelete = (id) => {
-    setRows(rows.filter((r) => r.id !== id));
-    setSnack("Target DP deleted");
+    deleteTargetDP(id);
+    setDeleteConfirm(null);
+    setSnack("Target DP removed");
   };
 
   const valid = form.entityName && form.dpId && form.clientId;
+  const active  = targetDPs.filter((r) => r.status === "Active");
+  const pending = targetDPs.filter((r) => r.status === "Pending");
 
   return (
     <Box>
-      <Alert severity="info" sx={{ mb: 2 }}>
-        Target DP Master manages the demat accounts where invoked shares are transferred upon final approval.
+      <PageHeader
+        icon={AccountTreeIcon}
+        title="Target DP Master"
+        subtitle="Manage the demat accounts (Depository Participant IDs) where invoked shares are transferred upon final approval."
+        color="#059669"
+      />
+
+      <Alert severity="info" sx={{ mb: 2.5 }}>
+        <strong>Demo tip:</strong> Add a new Target DP account, then click <strong>Activate</strong> to approve it.
+        Active accounts are used as the destination for invoked securities.
       </Alert>
+
+      {/* Summary */}
+      <Stack direction="row" spacing={1.5} sx={{ mb: 2.5 }}>
+        <Chip label={`${active.length} Active`} sx={{ bgcolor: "#f0fdf4", color: "#059669", border: "1px solid #bbf7d0", fontWeight: 700 }} />
+        <Chip label={`${pending.length} Pending Approval`} sx={{ bgcolor: "#fffbeb", color: "#d97706", border: "1px solid #fde68a", fontWeight: 700 }} />
+      </Stack>
 
       <Card>
         <CardContent>
-          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-            <Typography variant="subtitle2" sx={{ flex: 1 }}>Registered Target Demat Accounts</Typography>
-            <Button variant="contained" startIcon={<AddIcon />} size="small" onClick={() => setOpen(true)}>
+          <Stack direction="row" alignItems="center" sx={{ mb: 2.5 }}>
+            <Typography variant="subtitle1" sx={{ flex: 1 }}>Registered Demat Accounts</Typography>
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpen(true)}>
               Add Target DP
             </Button>
-          </Box>
-          <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid #e8ecf0", borderRadius: 2 }}>
-            <Table size="small">
+          </Stack>
+          <Box sx={{ overflowX: "auto" }}>
+            <Table size="small" sx={{ minWidth: 800 }}>
               <TableHead>
-                <TableRow sx={{ bgcolor: "#f8f9fb" }}>
+                <TableRow>
                   {["#", "Entity Name", "DP ID", "Client ID", "Bank", "IFSC", "Account No.", "Status", "Actions"].map((h) => (
-                    <TableCell key={h} sx={{ fontWeight: 600, fontSize: 12, color: "text.secondary", whiteSpace: "nowrap" }}>{h}</TableCell>
+                    <TableCell key={h}>{h}</TableCell>
                   ))}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.id} hover>
-                    <TableCell sx={{ fontSize: 12 }}>{row.id}</TableCell>
-                    <TableCell sx={{ fontSize: 12, fontWeight: 600 }}>{row.entityName}</TableCell>
-                    <TableCell sx={{ fontSize: 12, fontFamily: "monospace" }}>{row.dpId}</TableCell>
-                    <TableCell sx={{ fontSize: 12, fontFamily: "monospace" }}>{row.clientId}</TableCell>
+                {targetDPs.map((row) => (
+                  <TableRow key={row.id}>
+                    <TableCell sx={{ color: "#94a3b8", fontSize: 12 }}>{row.id}</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: 13 }}>{row.entityName}</TableCell>
+                    <TableCell sx={{ fontFamily: "monospace", fontSize: 12, color: "#1e40af" }}>{row.dpId}</TableCell>
+                    <TableCell sx={{ fontFamily: "monospace", fontSize: 11, color: "#64748b" }}>{row.clientId}</TableCell>
                     <TableCell sx={{ fontSize: 12 }}>{row.bank}</TableCell>
-                    <TableCell sx={{ fontSize: 12, fontFamily: "monospace" }}>{row.ifsc}</TableCell>
-                    <TableCell sx={{ fontSize: 12, fontFamily: "monospace" }}>{row.accountNo}</TableCell>
+                    <TableCell sx={{ fontFamily: "monospace", fontSize: 12 }}>{row.ifsc}</TableCell>
+                    <TableCell sx={{ fontFamily: "monospace", fontSize: 12 }}>{row.accountNo}</TableCell>
                     <TableCell>
                       <Chip
-                        label={row.status} size="small"
-                        color={row.status === "Active" ? "success" : "warning"}
-                        variant="filled"
+                        label={row.status}
+                        size="small"
+                        sx={
+                          row.status === "Active"
+                            ? { bgcolor: "#f0fdf4", color: "#059669", border: "1px solid #bbf7d0", fontWeight: 700 }
+                            : { bgcolor: "#fffbeb", color: "#d97706", border: "1px solid #fde68a", fontWeight: 700 }
+                        }
                       />
                     </TableCell>
                     <TableCell>
                       <Stack direction="row" spacing={0.5}>
                         {row.status === "Pending" && (
-                          <Tooltip title="Approve">
-                            <IconButton size="small" color="success" onClick={() => handleApprove(row.id)}>
-                              <CheckCircleIcon fontSize="small" />
-                            </IconButton>
+                          <Tooltip title="Activate this Target DP">
+                            <Button
+                              size="small" variant="contained" color="success"
+                              startIcon={<CheckCircleIcon />}
+                              onClick={() => handleApprove(row.id)}
+                              sx={{ fontSize: 11, px: 1, background: "linear-gradient(135deg,#059669,#34d399)" }}
+                            >
+                              Activate
+                            </Button>
                           </Tooltip>
                         )}
                         <Tooltip title="Delete">
-                          <IconButton size="small" color="error" onClick={() => handleDelete(row.id)}>
+                          <IconButton size="small" color="error" onClick={() => setDeleteConfirm(row.id)}>
                             <DeleteOutlineIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -97,45 +133,78 @@ export default function TargetDPMaster() {
                     </TableCell>
                   </TableRow>
                 ))}
+                {targetDPs.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={9} sx={{ textAlign: "center", py: 4, color: "text.secondary" }}>
+                      No Target DP accounts configured. Click "Add Target DP" to get started.
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
-          </TableContainer>
+          </Box>
         </CardContent>
       </Card>
 
-      {/* Add Dialog */}
+      {/* Add dialog */}
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ bgcolor: "primary.main", color: "white", py: 1.5 }}>Add Target DP Account</DialogTitle>
-        <DialogContent sx={{ pt: 2.5 }}>
-          <Grid container spacing={2}>
+        <DialogTitle sx={{ background: "linear-gradient(135deg,#059669,#34d399)", color: "white", py: 2, fontWeight: 700 }}>
+          Add Target DP Account
+        </DialogTitle>
+        <DialogContent sx={{ pt: 3 }}>
+          <Grid container spacing={2.5}>
             <Grid item xs={12}>
-              <TextField fullWidth size="small" label="Entity Name *" name="entityName" value={form.entityName} onChange={handleChange} />
+              <LF label="Entity Name *">
+                <TextField fullWidth name="entityName" value={form.entityName} onChange={handleChange} placeholder="e.g. FinSmart NBFC Ltd" />
+              </LF>
             </Grid>
             <Grid item xs={6}>
-              <TextField fullWidth size="small" label="DP ID *" name="dpId" value={form.dpId} onChange={handleChange} />
+              <LF label="DP ID *">
+                <TextField fullWidth name="dpId" value={form.dpId} onChange={handleChange} placeholder="e.g. IN300095" />
+              </LF>
             </Grid>
             <Grid item xs={6}>
-              <TextField fullWidth size="small" label="Client ID *" name="clientId" value={form.clientId} onChange={handleChange} />
+              <LF label="Client ID *">
+                <TextField fullWidth name="clientId" value={form.clientId} onChange={handleChange} placeholder="e.g. IN30009511223344" />
+              </LF>
             </Grid>
             <Grid item xs={6}>
-              <TextField fullWidth size="small" label="Bank Name" name="bank" value={form.bank} onChange={handleChange} />
+              <LF label="Bank Name">
+                <TextField fullWidth name="bank" value={form.bank} onChange={handleChange} placeholder="e.g. HDFC Bank" />
+              </LF>
             </Grid>
             <Grid item xs={6}>
-              <TextField fullWidth size="small" label="IFSC Code" name="ifsc" value={form.ifsc} onChange={handleChange} />
+              <LF label="IFSC Code">
+                <TextField fullWidth name="ifsc" value={form.ifsc} onChange={handleChange} placeholder="e.g. HDFC0001234" />
+              </LF>
             </Grid>
             <Grid item xs={12}>
-              <TextField fullWidth size="small" label="Account Number" name="accountNo" value={form.accountNo} onChange={handleChange} />
+              <LF label="Account Number">
+                <TextField fullWidth name="accountNo" value={form.accountNo} onChange={handleChange} placeholder="e.g. 50100123456789" />
+              </LF>
             </Grid>
           </Grid>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="contained" disabled={!valid} onClick={handleAdd}>Add</Button>
+        <DialogActions sx={{ px: 3, pb: 2.5 }}>
+          <Button onClick={() => { setOpen(false); setForm(empty); }}>Cancel</Button>
+          <Button variant="contained" disabled={!valid} onClick={handleAdd}>Add Account</Button>
         </DialogActions>
       </Dialog>
 
-      <Snackbar open={!!snack} autoHideDuration={3000} onClose={() => setSnack(null)} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
-        <Alert severity="success" onClose={() => setSnack(null)}>{snack}</Alert>
+      {/* Delete confirm */}
+      <Dialog open={!!deleteConfirm} onClose={() => setDeleteConfirm(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ color: "#dc2626", fontWeight: 700 }}>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Alert severity="error">This will permanently remove this Target DP account. Are you sure?</Alert>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5 }}>
+          <Button onClick={() => setDeleteConfirm(null)}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={() => handleDelete(deleteConfirm)}>Delete</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar open={!!snack} autoHideDuration={3500} onClose={() => setSnack(null)} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
+        <Alert severity="success" onClose={() => setSnack(null)} sx={{ fontWeight: 600 }}>{snack}</Alert>
       </Snackbar>
     </Box>
   );

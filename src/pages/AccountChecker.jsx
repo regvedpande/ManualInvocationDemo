@@ -1,105 +1,146 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   Box, Card, CardContent, Typography, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, Button, Dialog,
-  DialogTitle, DialogContent, DialogActions, TextField, Chip,
-  Grid, Divider, Alert, Snackbar, Stack, InputAdornment,
+  TableHead, TableRow, Button, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, Grid, Alert, Snackbar, Stack,
+  InputAdornment, Chip, Divider,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import SearchIcon from "@mui/icons-material/Search";
-import { invocations } from "../mockData";
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
+import { AppContext } from "../context/AppContext";
+import PageHeader from "../components/PageHeader";
 import StatusChip from "../components/StatusChip";
 
-const InfoRow = ({ label, value }) => (
+const DetailRow = ({ label, value }) => (
   <Grid item xs={6} sm={4}>
-    <Typography variant="caption" color="text.secondary">{label}</Typography>
-    <Typography variant="body2" sx={{ fontWeight: 600, mt: 0.2 }}>{value || "—"}</Typography>
+    <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.3 }}>{label}</Typography>
+    <Typography variant="body2" sx={{ fontWeight: 600 }}>{value || "—"}</Typography>
   </Grid>
 );
 
 export default function AccountChecker() {
-  const [rows, setRows] = useState(invocations.filter((r) => r.status === "Pending Checker"));
-  const [processed, setProcessed] = useState([]);
-  const [selected, setSelected] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [remarks, setRemarks] = useState("");
-  const [action, setAction] = useState(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [snack, setSnack] = useState(null);
+  const { pendingChecker, updateStatus } = useContext(AppContext);
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState(null);
+  const [viewOpen, setViewOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [action, setAction] = useState(null);
+  const [remarks, setRemarks] = useState("");
+  const [snack, setSnack] = useState(null);
 
-  const filtered = rows.filter(
-    (r) => r.id.toLowerCase().includes(search.toLowerCase()) || r.clientName.toLowerCase().includes(search.toLowerCase())
+  const filtered = pendingChecker.filter(
+    (r) =>
+      r.id.toLowerCase().includes(search.toLowerCase()) ||
+      r.clientName.toLowerCase().includes(search.toLowerCase()) ||
+      r.scripName.toLowerCase().includes(search.toLowerCase())
   );
 
-  const openConfirm = (row, act) => { setSelected(row); setAction(act); setRemarks(""); setConfirmOpen(true); };
+  const openConfirm = (row, act) => {
+    setSelected(row);
+    setAction(act);
+    setRemarks("");
+    setConfirmOpen(true);
+  };
 
   const handleDecision = () => {
-    const newStatus = action === "approve" ? "Pending Risk" : "Rejected";
-    setRows(rows.filter((r) => r.id !== selected.id));
-    setProcessed([{ ...selected, status: newStatus, remarks }, ...processed]);
+    updateStatus(selected.id, action === "approve" ? "Pending Risk" : "Rejected", remarks);
     setConfirmOpen(false);
-    setSnack(action === "approve" ? "Approved and forwarded to Risk Team" : "Request rejected");
+    setSnack(action === "approve"
+      ? `✓ ${selected.id} approved — escalated to Risk Team`
+      : `✗ ${selected.id} rejected at Checker stage`
+    );
   };
 
   return (
     <Box>
-      <Alert severity="info" sx={{ mb: 2 }}>
-        As the <strong>Checker</strong>, you are the second line of defence. Review requests approved by the Maker before forwarding to Risk.
+      <PageHeader
+        icon={VerifiedUserIcon}
+        title="Account Checker"
+        subtitle="Second-level review. Requests approved here are escalated to the Risk Team for final sign-off."
+        color="#7c3aed"
+      />
+
+      <Alert severity="info" sx={{ mb: 2.5 }}>
+        <strong>Demo tip:</strong> These requests were approved by the <strong>Account Maker</strong>.
+        Approve here to push them to <strong>Risk Approval</strong> — the final stage.
+        {pendingChecker.length === 0 && " Go to Account Maker first to approve a request."}
       </Alert>
 
-      <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-        <Chip label={`Pending: ${rows.length}`} color="info" />
-        <Chip label={`Processed: ${processed.length}`} color="default" />
-      </Stack>
-
-      <Card sx={{ mb: 3 }}>
+      <Card>
         <CardContent>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-            <Typography variant="subtitle2" sx={{ flex: 1 }}>Pending for Checker Review</Typography>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ sm: "center" }} sx={{ mb: 2 }}>
             <TextField
-              size="small" placeholder="Search..." value={search}
+              placeholder="Search by ID, client, scrip..."
+              value={search}
               onChange={(e) => setSearch(e.target.value)}
               InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon sx={{ color: "text.disabled" }} /></InputAdornment> }}
-              sx={{ width: 240 }}
+              sx={{ width: { xs: "100%", sm: 320 } }}
             />
-          </Box>
+            <Chip
+              label={`${filtered.length} Pending`}
+              sx={{ bgcolor: "#f5f3ff", color: "#7c3aed", border: "1px solid #ddd6fe", fontWeight: 700 }}
+            />
+          </Stack>
+
           {filtered.length === 0 ? (
-            <Alert severity="success">No pending requests for Checker review.</Alert>
+            <Box sx={{
+              py: 6, textAlign: "center", borderRadius: 3,
+              background: "linear-gradient(135deg, #f5f3ff, #ede9fe)",
+              border: "1px dashed #c4b5fd",
+            }}>
+              <VerifiedUserIcon sx={{ fontSize: 48, color: "#8b5cf6", mb: 1 }} />
+              <Typography variant="h6" sx={{ color: "#6d28d9", fontWeight: 700 }}>Queue Empty</Typography>
+              <Typography variant="body2" color="text.secondary">
+                No requests pending Checker review. Approve requests in <strong>Account Maker</strong> first.
+              </Typography>
+            </Box>
           ) : (
-            <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid #e8ecf0", borderRadius: 2 }}>
-              <Table size="small">
+            <Box sx={{ overflowX: "auto" }}>
+              <Table size="small" sx={{ minWidth: 900 }}>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: "#f8f9fb" }}>
-                    {["Request ID", "Date", "Client", "Scrip", "ISIN", "Quantity", "Value", "Maker Remarks", "Actions"].map((h) => (
-                      <TableCell key={h} sx={{ fontWeight: 600, fontSize: 12, color: "text.secondary", whiteSpace: "nowrap" }}>{h}</TableCell>
+                  <TableRow>
+                    {["Request ID", "Date", "Client", "Scrip", "ISIN", "Qty", "Total Value", "Maker Remarks", "Actions"].map((h) => (
+                      <TableCell key={h}>{h}</TableCell>
                     ))}
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filtered.map((row) => (
-                    <TableRow key={row.id} hover>
-                      <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "primary.main" }}>{row.id}</TableCell>
+                    <TableRow key={row.id}>
+                      <TableCell sx={{ fontFamily: "monospace", fontWeight: 700, color: "#1e40af", fontSize: 12 }}>{row.id}</TableCell>
                       <TableCell sx={{ fontSize: 12 }}>{row.requestDate}</TableCell>
-                      <TableCell sx={{ fontSize: 12, whiteSpace: "nowrap" }}>{row.clientName}</TableCell>
-                      <TableCell sx={{ fontSize: 12, whiteSpace: "nowrap" }}>{row.scripName}</TableCell>
-                      <TableCell sx={{ fontSize: 11, fontFamily: "monospace" }}>{row.isin}</TableCell>
+                      <TableCell sx={{ fontSize: 13, fontWeight: 600 }}>{row.clientName}</TableCell>
+                      <TableCell sx={{ fontSize: 12 }}>{row.scripName}</TableCell>
+                      <TableCell sx={{ fontSize: 11, fontFamily: "monospace", color: "#64748b" }}>{row.isin}</TableCell>
                       <TableCell sx={{ fontSize: 12 }}>{row.quantity.toLocaleString("en-IN")}</TableCell>
-                      <TableCell sx={{ fontSize: 12, fontWeight: 600 }}>
-                        ₹{(row.quantity * row.cmp).toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+                      <TableCell>
+                        <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                          ₹{(row.quantity * row.cmp).toLocaleString("en-IN", { maximumFractionDigits: 0 })}
+                        </Typography>
                       </TableCell>
-                      <TableCell sx={{ fontSize: 12, color: "text.secondary" }}>{row.remarks || "—"}</TableCell>
+                      <TableCell>
+                        <Typography variant="caption" sx={{ color: "#64748b", fontStyle: "italic" }}>
+                          {row.remarks || "No remarks"}
+                        </Typography>
+                      </TableCell>
                       <TableCell>
                         <Stack direction="row" spacing={0.5}>
-                          <Button size="small" variant="outlined" startIcon={<VisibilityIcon />} onClick={() => { setSelected(row); setOpen(true); }} sx={{ fontSize: 11 }}>
+                          <Button size="small" variant="outlined" startIcon={<VisibilityIcon />}
+                            onClick={() => { setSelected(row); setViewOpen(true); }}
+                            sx={{ fontSize: 11, minWidth: 0, px: 1 }}>
                             View
                           </Button>
-                          <Button size="small" variant="contained" color="success" startIcon={<CheckCircleIcon />} onClick={() => openConfirm(row, "approve")} sx={{ fontSize: 11 }}>
+                          <Button size="small" variant="contained" color="success"
+                            startIcon={<CheckCircleIcon />} onClick={() => openConfirm(row, "approve")}
+                            sx={{ fontSize: 11, minWidth: 0, px: 1, background: "linear-gradient(135deg,#059669,#34d399)" }}>
                             Approve
                           </Button>
-                          <Button size="small" variant="contained" color="error" startIcon={<CancelIcon />} onClick={() => openConfirm(row, "reject")} sx={{ fontSize: 11 }}>
+                          <Button size="small" variant="contained" color="error"
+                            startIcon={<CancelIcon />} onClick={() => openConfirm(row, "reject")}
+                            sx={{ fontSize: 11, minWidth: 0, px: 1 }}>
                             Reject
                           </Button>
                         </Stack>
@@ -108,101 +149,76 @@ export default function AccountChecker() {
                   ))}
                 </TableBody>
               </Table>
-            </TableContainer>
+            </Box>
           )}
         </CardContent>
       </Card>
 
-      {processed.length > 0 && (
-        <Card>
-          <CardContent>
-            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5 }}>Processed by Me</Typography>
-            <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid #e8ecf0", borderRadius: 2 }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow sx={{ bgcolor: "#f8f9fb" }}>
-                    {["Request ID", "Client", "Scrip", "Status", "Remarks"].map((h) => (
-                      <TableCell key={h} sx={{ fontWeight: 600, fontSize: 12, color: "text.secondary" }}>{h}</TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {processed.map((row) => (
-                    <TableRow key={row.id} hover>
-                      <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "primary.main" }}>{row.id}</TableCell>
-                      <TableCell sx={{ fontSize: 12 }}>{row.clientName}</TableCell>
-                      <TableCell sx={{ fontSize: 12 }}>{row.scripName}</TableCell>
-                      <TableCell><StatusChip status={row.status} /></TableCell>
-                      <TableCell sx={{ fontSize: 12 }}>{row.remarks || "—"}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* View Dialog */}
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ bgcolor: "primary.main", color: "white", py: 1.5 }}>
-          Invocation Details — {selected?.id}
+      {/* View dialog */}
+      <Dialog open={viewOpen} onClose={() => setViewOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ background: "linear-gradient(135deg,#7c3aed,#a78bfa)", color: "white", py: 2, fontWeight: 700 }}>
+          Checker Review — {selected?.id}
         </DialogTitle>
         {selected && (
-          <DialogContent sx={{ pt: 2.5 }}>
+          <DialogContent sx={{ pt: 3 }}>
             <Grid container spacing={2}>
-              <InfoRow label="Client Name" value={selected.clientName} />
-              <InfoRow label="PAN" value={selected.pan} />
-              <InfoRow label="ISIN" value={selected.isin} />
-              <InfoRow label="Scrip Name" value={selected.scripName} />
-              <InfoRow label="Quantity" value={selected.quantity.toLocaleString("en-IN")} />
-              <InfoRow label="CMP" value={`₹${selected.cmp.toLocaleString("en-IN")}`} />
-              <InfoRow label="Loan Code" value={selected.loanCode} />
-              <InfoRow label="Product" value={selected.product} />
-              <InfoRow label="UTR No." value={selected.utr} />
-              <InfoRow label="Pledger DP ID" value={selected.pledgerDpId} />
-              <InfoRow label="Pledger Client ID" value={selected.pledgerClientId} />
-              <InfoRow label="Attached File" value={selected.file} />
+              <DetailRow label="Client Name" value={selected.clientName} />
+              <DetailRow label="PAN" value={selected.pan} />
+              <DetailRow label="ISIN" value={selected.isin} />
+              <DetailRow label="Scrip Name" value={selected.scripName} />
+              <DetailRow label="Quantity" value={selected.quantity.toLocaleString("en-IN")} />
+              <DetailRow label="CMP" value={`₹${selected.cmp.toLocaleString("en-IN")}`} />
+              <DetailRow label="Loan Code" value={selected.loanCode} />
+              <DetailRow label="Product" value={selected.product} />
+              <DetailRow label="UTR No." value={selected.utr} />
+              <DetailRow label="Pledger DP ID" value={selected.pledgerDpId} />
             </Grid>
-            <Divider sx={{ my: 2 }} />
+            <Divider sx={{ my: 2.5 }} />
             <Alert severity="warning" icon={false}>
-              <strong>Maker Remarks:</strong> {selected.remarks || "No remarks provided"}
+              <strong>Maker Remarks:</strong> {selected.remarks || "None provided"}
             </Alert>
           </DialogContent>
         )}
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-          <Button onClick={() => setOpen(false)}>Close</Button>
-          <Button variant="contained" color="success" startIcon={<CheckCircleIcon />} onClick={() => { setOpen(false); openConfirm(selected, "approve"); }}>Approve</Button>
-          <Button variant="contained" color="error" startIcon={<CancelIcon />} onClick={() => { setOpen(false); openConfirm(selected, "reject"); }}>Reject</Button>
+        <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+          <Button onClick={() => setViewOpen(false)}>Close</Button>
+          <Button variant="contained" color="success" startIcon={<CheckCircleIcon />}
+            onClick={() => { setViewOpen(false); openConfirm(selected, "approve"); }}>Approve</Button>
+          <Button variant="contained" color="error" startIcon={<CancelIcon />}
+            onClick={() => { setViewOpen(false); openConfirm(selected, "reject"); }}>Reject</Button>
         </DialogActions>
       </Dialog>
 
-      {/* Confirm Dialog */}
+      {/* Confirm dialog */}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ color: action === "approve" ? "success.main" : "error.main" }}>
-          {action === "approve" ? "Confirm Approval" : "Confirm Rejection"}
+        <DialogTitle sx={{ color: action === "approve" ? "#059669" : "#dc2626", fontWeight: 700, pb: 1 }}>
+          {action === "approve" ? "Confirm Checker Approval" : "Confirm Rejection"}
         </DialogTitle>
         <DialogContent>
-          <Typography variant="body2" sx={{ mb: 2 }}>
+          <Alert severity={action === "approve" ? "success" : "error"} sx={{ mb: 2 }}>
             {action === "approve"
-              ? `Approving ${selected?.id} will forward it to the Risk Team.`
-              : `Rejecting ${selected?.id} will terminate the invocation request.`}
-          </Typography>
+              ? `${selected?.id} will be forwarded to the Risk Team for final approval.`
+              : `${selected?.id} will be rejected permanently.`}
+          </Alert>
           <TextField
-            fullWidth size="small" label="Checker Remarks" multiline rows={2}
-            value={remarks} onChange={(e) => setRemarks(e.target.value)}
+            fullWidth label="Checker Remarks" multiline rows={3} value={remarks}
+            onChange={(e) => setRemarks(e.target.value)}
+            placeholder={action === "reject" ? "Reason for rejection (required)..." : "Optional remarks for Risk team..."}
           />
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
+        <DialogActions sx={{ px: 3, pb: 2.5 }}>
           <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
-          <Button variant="contained" color={action === "approve" ? "success" : "error"} onClick={handleDecision}>
+          <Button variant="contained" color={action === "approve" ? "success" : "error"}
+            onClick={handleDecision}
+            disabled={action === "reject" && !remarks.trim()}>
             Confirm
           </Button>
         </DialogActions>
       </Dialog>
 
-      <Snackbar open={!!snack} autoHideDuration={3000} onClose={() => setSnack(null)} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
-        <Alert severity={snack?.includes("reject") ? "error" : "success"} onClose={() => setSnack(null)}>{snack}</Alert>
+      <Snackbar open={!!snack} autoHideDuration={4000} onClose={() => setSnack(null)} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
+        <Alert severity={snack?.startsWith("✗") ? "error" : "success"} onClose={() => setSnack(null)} sx={{ fontWeight: 600 }}>
+          {snack}
+        </Alert>
       </Snackbar>
     </Box>
   );
