@@ -20,13 +20,13 @@ import { useContext } from "react";
 import { AppContext } from "../context/AppContext";
 import StatusChip from "../components/StatusChip";
 
-const statCards = [
-  { label: "Total Requests",   value: stats.total,           icon: TrendingUpIcon,           gradient: "linear-gradient(135deg, #1e40af, #3b82f6)", path: "/initiate" },
-  { label: "Pending Maker",    value: stats.pendingMaker,    icon: PendingActionsIcon,        gradient: "linear-gradient(135deg, #d97706, #f59e0b)", path: "/maker" },
-  { label: "Pending Checker",  value: stats.pendingChecker,  icon: PendingActionsIcon,        gradient: "linear-gradient(135deg, #7c3aed, #a78bfa)", path: "/checker" },
-  { label: "Pending Risk",     value: stats.pendingRisk,     icon: PendingActionsIcon,        gradient: "linear-gradient(135deg, #0369a1, #38bdf8)", path: "/risk" },
-  { label: "Approved",         value: stats.approved,        icon: CheckCircleOutlineIcon,    gradient: "linear-gradient(135deg, #059669, #34d399)", path: "/" },
-  { label: "Rejected",         value: stats.rejected,        icon: CancelOutlinedIcon,        gradient: "linear-gradient(135deg, #dc2626, #f87171)", path: "/" },
+const statCardDefs = [
+  { label: "Total Requests",  key: "total",          icon: TrendingUpIcon,        gradient: "linear-gradient(135deg, #1e40af, #3b82f6)", path: "/initiate" },
+  { label: "Pending Maker",   key: "pendingMaker",   icon: PendingActionsIcon,    gradient: "linear-gradient(135deg, #d97706, #f59e0b)", path: "/maker" },
+  { label: "Pending Checker", key: "pendingChecker", icon: PendingActionsIcon,    gradient: "linear-gradient(135deg, #7c3aed, #a78bfa)", path: "/checker" },
+  { label: "Pending Risk",    key: "pendingRisk",    icon: PendingActionsIcon,    gradient: "linear-gradient(135deg, #0369a1, #38bdf8)", path: "/risk" },
+  { label: "Approved",        key: "approved",       icon: CheckCircleOutlineIcon,gradient: "linear-gradient(135deg, #059669, #34d399)", path: "/" },
+  { label: "Rejected",        key: "rejected",       icon: CancelOutlinedIcon,    gradient: "linear-gradient(135deg, #dc2626, #f87171)", path: "/" },
 ];
 
 const barData = [
@@ -35,14 +35,6 @@ const barData = [
   { name: "Apr 3", requests: 2, color: "#3b82f6" },
   { name: "Apr 4", requests: 1, color: "#3b82f6" },
   { name: "Apr 5", requests: 2, color: "#3b82f6" },
-];
-
-const statusData = [
-  { label: "Pending Maker",   value: 2,  color: "#f59e0b", pct: 25 },
-  { label: "Pending Checker", value: 2,  color: "#8b5cf6", pct: 25 },
-  { label: "Pending Risk",    value: 2,  color: "#0ea5e9", pct: 25 },
-  { label: "Approved",        value: 1,  color: "#10b981", pct: 12.5 },
-  { label: "Rejected",        value: 1,  color: "#ef4444", pct: 12.5 },
 ];
 
 const fmt = (n) =>
@@ -60,6 +52,15 @@ export default function Dashboard() {
   const theme = useTheme();
   const isSm = useMediaQuery(theme.breakpoints.down("sm"));
   const { invocations, stats } = useContext(AppContext);
+
+  const statCards = statCardDefs.map((d) => ({ ...d, value: stats[d.key] }));
+  const statusData = [
+    { label: "Pending Maker",   value: stats.pendingMaker,   color: "#f59e0b", pct: Math.round(stats.pendingMaker   / stats.total * 100) || 0 },
+    { label: "Pending Checker", value: stats.pendingChecker, color: "#8b5cf6", pct: Math.round(stats.pendingChecker / stats.total * 100) || 0 },
+    { label: "Pending Risk",    value: stats.pendingRisk,    color: "#0ea5e9", pct: Math.round(stats.pendingRisk    / stats.total * 100) || 0 },
+    { label: "Approved",        value: stats.approved,       color: "#10b981", pct: Math.round(stats.approved       / stats.total * 100) || 0 },
+    { label: "Rejected",        value: stats.rejected,       color: "#ef4444", pct: Math.round(stats.rejected       / stats.total * 100) || 0 },
+  ];
 
   return (
     <Box>
