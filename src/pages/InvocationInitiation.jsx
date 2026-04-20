@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import {
   Box, Card, CardContent, Typography, Grid, TextField, Button,
   MenuItem, Table, TableBody, TableCell, TableHead, TableRow,
-  Tabs, Tab, Chip, InputAdornment, Alert, Snackbar, Stack, alpha,
+  Tabs, Tab, Chip, InputAdornment, Alert, Snackbar, Stack,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
@@ -10,7 +10,7 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import SendIcon from "@mui/icons-material/Send";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import { AppContext } from "../context/AppContext";
+import { AppContext } from "../context/InvocationContext";
 import PageHeader from "../components/PageHeader";
 import StatusChip from "../components/StatusChip";
 
@@ -28,6 +28,20 @@ const scrips = [
 const empty = {
   clientName: "", pan: "", isin: "", scripName: "", quantity: "",
   cmp: "", loanCode: "", product: "", utr: "", pledgerDpId: "", pledgerClientId: "",
+};
+
+const sampleRequest = {
+  clientName: "Priya Sharma",
+  pan: "FGHIJ5678K",
+  isin: "INE040A01034",
+  scripName: "HDFC Bank",
+  quantity: "350",
+  cmp: "1642",
+  loanCode: "LAS-4472",
+  product: "LAP",
+  utr: "UTR20260420001",
+  pledgerDpId: "12081801",
+  pledgerClientId: "1208180157",
 };
 
 const LabelledField = ({ label, children }) => (
@@ -85,7 +99,7 @@ export default function InvocationInitiation() {
       <PageHeader
         icon={AddCircleOutlineIcon}
         title="Initiate Invocation"
-        subtitle="Submit a new pledge invocation request — it will enter the Maker → Checker → Risk approval pipeline"
+        subtitle="Create a collateral invocation request and route it through Maker, Checker, and Risk controls"
         color="#1e40af"
       />
 
@@ -110,9 +124,23 @@ export default function InvocationInitiation() {
       {tab === 0 && (
         <Card>
           <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-            <Alert severity="info" sx={{ mb: 3 }}>
-              After submission, this request will appear in <strong>Account Maker</strong> for first-level review.
-            </Alert>
+
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ mb: 3 }}>
+              <Button
+                variant="outlined"
+                startIcon={<AddCircleOutlineIcon />}
+                onClick={() => {
+                  setForm(sampleRequest);
+                  setFileName("board_resolution_and_pledge_statement.pdf");
+                }}
+              >
+                Load example request
+              </Button>
+              <Chip
+                label="Frontend-only demo. State persists during your session."
+                sx={{ alignSelf: { xs: "flex-start", sm: "center" }, bgcolor: "#f8fafc", border: "1px solid #e2e8f0" }}
+              />
+            </Stack>
             <Grid container spacing={2.5}>
               <Grid item xs={12} sm={6} md={4}>
                 <LabelledField label="Client Name *">
@@ -225,7 +253,7 @@ export default function InvocationInitiation() {
               <Button variant="contained" startIcon={<SendIcon />} disabled={!valid} onClick={handleSubmit} size="large">
                 Submit Invocation Request
               </Button>
-              <Button variant="outlined" onClick={() => setForm(empty)}>Reset</Button>
+              <Button variant="outlined" onClick={() => { setForm(empty); setFileName(""); }}>Reset</Button>
             </Stack>
           </CardContent>
         </Card>

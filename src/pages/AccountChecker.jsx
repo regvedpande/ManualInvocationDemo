@@ -10,9 +10,8 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import SearchIcon from "@mui/icons-material/Search";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
-import { AppContext } from "../context/AppContext";
+import { AppContext } from "../context/InvocationContext";
 import PageHeader from "../components/PageHeader";
-import StatusChip from "../components/StatusChip";
 
 const DetailRow = ({ label, value }) => (
   <Grid item xs={6} sm={4}>
@@ -49,8 +48,8 @@ export default function AccountChecker() {
     updateStatus(selected.id, action === "approve" ? "Pending Risk" : "Rejected", remarks);
     setConfirmOpen(false);
     setSnack(action === "approve"
-      ? `✓ ${selected.id} approved — escalated to Risk Team`
-      : `✗ ${selected.id} rejected at Checker stage`
+      ? `Approved: ${selected.id} escalated to the Risk queue`
+      : `Rejected: ${selected.id} was stopped at Checker review`
     );
   };
 
@@ -63,11 +62,7 @@ export default function AccountChecker() {
         color="#7c3aed"
       />
 
-      <Alert severity="info" sx={{ mb: 2.5 }}>
-        <strong>Demo tip:</strong> These requests were approved by the <strong>Account Maker</strong>.
-        Approve here to push them to <strong>Risk Approval</strong> — the final stage.
-        {pendingChecker.length === 0 && " Go to Account Maker first to approve a request."}
-      </Alert>
+
 
       <Card>
         <CardContent>
@@ -216,7 +211,7 @@ export default function AccountChecker() {
       </Dialog>
 
       <Snackbar open={!!snack} autoHideDuration={4000} onClose={() => setSnack(null)} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
-        <Alert severity={snack?.startsWith("✗") ? "error" : "success"} onClose={() => setSnack(null)} sx={{ fontWeight: 600 }}>
+        <Alert severity={snack?.startsWith("Rejected") ? "error" : "success"} onClose={() => setSnack(null)} sx={{ fontWeight: 600 }}>
           {snack}
         </Alert>
       </Snackbar>

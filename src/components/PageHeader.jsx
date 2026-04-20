@@ -1,6 +1,8 @@
 import { Box, Typography, alpha } from "@mui/material";
 
-export default function PageHeader({ icon: Icon, title, subtitle, color = "#1e40af" }) {
+export default function PageHeader({ icon, title, subtitle, color = "#1e40af" }) {
+  const IconComponent = icon;
+
   return (
     <Box sx={{
       display: "flex", alignItems: "center", gap: 2, mb: 3,
@@ -14,7 +16,7 @@ export default function PageHeader({ icon: Icon, title, subtitle, color = "#1e40
         display: "flex", alignItems: "center", justifyContent: "center",
         boxShadow: `0 4px 12px ${alpha(color, 0.3)}`,
       }}>
-        <Icon sx={{ color: "white", fontSize: 24 }} />
+        <IconComponent sx={{ color: "white", fontSize: 24 }} />
       </Box>
       <Box>
         <Typography variant="h6" sx={{ fontWeight: 800, color: "text.primary", lineHeight: 1.2 }}>{title}</Typography>

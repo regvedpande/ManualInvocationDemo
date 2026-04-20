@@ -1,151 +1,205 @@
-import React from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Grid, Card, CardContent, Typography, Box,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Stack, Button, Chip, useMediaQuery, useTheme, alpha,
+  Alert, Box, Button, Card, CardContent, Chip, Grid, InputAdornment, Slider,
+  Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  TextField, Typography, alpha, useMediaQuery, useTheme,
 } from "@mui/material";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import PendingActionsIcon from "@mui/icons-material/PendingActions";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import FactCheckIcon from "@mui/icons-material/FactCheck";
+import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
+import InsightsIcon from "@mui/icons-material/Insights";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
+import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
+import SpeedIcon from "@mui/icons-material/Speed";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartTooltip,
-  ResponsiveContainer, Cell,
+  Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip as RechartTooltip, XAxis, YAxis,
 } from "recharts";
-import { useContext } from "react";
-import { AppContext } from "../context/AppContext";
+import { AppContext } from "../context/InvocationContext";
 import StatusChip from "../components/StatusChip";
 
-const statCardDefs = [
-  { label: "Total Requests",  key: "total",          icon: TrendingUpIcon,        gradient: "linear-gradient(135deg, #1e40af, #3b82f6)", path: "/initiate" },
-  { label: "Pending Maker",   key: "pendingMaker",   icon: PendingActionsIcon,    gradient: "linear-gradient(135deg, #d97706, #f59e0b)", path: "/maker" },
-  { label: "Pending Checker", key: "pendingChecker", icon: PendingActionsIcon,    gradient: "linear-gradient(135deg, #7c3aed, #a78bfa)", path: "/checker" },
-  { label: "Pending Risk",    key: "pendingRisk",    icon: PendingActionsIcon,    gradient: "linear-gradient(135deg, #0369a1, #38bdf8)", path: "/risk" },
-  { label: "Approved",        key: "approved",       icon: CheckCircleOutlineIcon,gradient: "linear-gradient(135deg, #059669, #34d399)", path: "/" },
-  { label: "Rejected",        key: "rejected",       icon: CancelOutlinedIcon,    gradient: "linear-gradient(135deg, #dc2626, #f87171)", path: "/" },
-];
-
-const barData = [
-  { name: "Apr 1", requests: 1, color: "#3b82f6" },
-  { name: "Apr 2", requests: 2, color: "#3b82f6" },
-  { name: "Apr 3", requests: 2, color: "#3b82f6" },
-  { name: "Apr 4", requests: 1, color: "#3b82f6" },
-  { name: "Apr 5", requests: 2, color: "#3b82f6" },
-];
-
 const fmt = (n) =>
-  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n || 0);
 
 const steps = [
-  { n: "01", title: "Initiate",        desc: "Submit a pledge invocation request with ISIN, quantity, and documents.",   color: "#3b82f6", path: "/initiate" },
-  { n: "02", title: "Account Maker",   desc: "First-level reviewer verifies the request and approves or rejects.",        color: "#f59e0b", path: "/maker" },
-  { n: "03", title: "Account Checker", desc: "Second-level reviewer re-validates before escalating to Risk.",             color: "#8b5cf6", path: "/checker" },
-  { n: "04", title: "Risk Approval",   desc: "Risk team gives final sign-off. Approved requests trigger invocation.",     color: "#10b981", path: "/risk" },
+  { n: "01", title: "Originate", desc: "Create a pledged-security invocation request with demat and loan context.", color: "#1e40af", path: "/initiate" },
+  { n: "02", title: "Maker Control", desc: "Validate documents, pledge identifiers, and requested transfer quantity.", color: "#d97706", path: "/maker" },
+  { n: "03", title: "Checker Control", desc: "Run independent four-eye review before final risk sign-off.", color: "#7c3aed", path: "/checker" },
+  { n: "04", title: "Risk Sign-off", desc: "Review exposure, concentration, LTV pressure, and execution readiness.", color: "#0369a1", path: "/risk" },
 ];
+
+const getRequestValue = (row) => row.quantity * row.cmp;
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const theme = useTheme();
   const isSm = useMediaQuery(theme.breakpoints.down("sm"));
   const { invocations, stats } = useContext(AppContext);
+  const [scenario, setScenario] = useState({
+    quantity: 450,
+    cmp: 1825,
+    haircut: 22,
+    loanOutstanding: 525000,
+  });
 
-  const statCards = statCardDefs.map((d) => ({ ...d, value: stats[d.key] }));
+  const pendingCount = stats.pendingMaker + stats.pendingChecker + stats.pendingRisk;
+  const approvedValue = invocations
+    .filter((row) => row.status === "Approved")
+    .reduce((sum, row) => sum + getRequestValue(row), 0);
+  const pendingValue = invocations
+    .filter((row) => row.status.startsWith("Pending"))
+    .reduce((sum, row) => sum + getRequestValue(row), 0);
+  const largestExposure = invocations.reduce((max, row) => Math.max(max, getRequestValue(row)), 0);
+  const completionRate = Math.round((stats.approved / Math.max(stats.total, 1)) * 100);
+  const exceptionRate = Math.round((stats.rejected / Math.max(stats.total, 1)) * 100);
+  const highValueCount = invocations.filter((row) => getRequestValue(row) > 750000).length;
+
+  const dailyData = useMemo(() => {
+    const byDate = invocations.reduce((acc, row) => {
+      const key = new Date(row.requestDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(byDate)
+      .map(([name, requests]) => ({ name, requests }))
+      .reverse();
+  }, [invocations]);
+
   const statusData = [
-    { label: "Pending Maker",   value: stats.pendingMaker,   color: "#f59e0b", pct: Math.round(stats.pendingMaker   / stats.total * 100) || 0 },
-    { label: "Pending Checker", value: stats.pendingChecker, color: "#8b5cf6", pct: Math.round(stats.pendingChecker / stats.total * 100) || 0 },
-    { label: "Pending Risk",    value: stats.pendingRisk,    color: "#0ea5e9", pct: Math.round(stats.pendingRisk    / stats.total * 100) || 0 },
-    { label: "Approved",        value: stats.approved,       color: "#10b981", pct: Math.round(stats.approved       / stats.total * 100) || 0 },
-    { label: "Rejected",        value: stats.rejected,       color: "#ef4444", pct: Math.round(stats.rejected       / stats.total * 100) || 0 },
+    { label: "Maker", value: stats.pendingMaker, color: "#d97706" },
+    { label: "Checker", value: stats.pendingChecker, color: "#7c3aed" },
+    { label: "Risk", value: stats.pendingRisk, color: "#0369a1" },
+    { label: "Approved", value: stats.approved, color: "#059669" },
+    { label: "Rejected", value: stats.rejected, color: "#dc2626" },
+  ].map((item) => ({
+    ...item,
+    pct: Math.round((item.value / Math.max(stats.total, 1)) * 100),
+  }));
+
+  const collateralValue = Number(scenario.quantity) * Number(scenario.cmp);
+  const postHaircutValue = collateralValue * (1 - Number(scenario.haircut) / 100);
+  const coverageRatio = postHaircutValue / Math.max(Number(scenario.loanOutstanding), 1);
+  const suggestedBand =
+    coverageRatio >= 1.35 ? { label: "Comfortable", color: "#059669", bg: "#f0fdf4" } :
+    coverageRatio >= 1.1 ? { label: "Watchlist", color: "#d97706", bg: "#fffbeb" } :
+    { label: "Escalate", color: "#dc2626", bg: "#fef2f2" };
+
+  const executiveCards = [
+    {
+      label: "Invocation Exposure",
+      value: fmt(stats.totalValue),
+      detail: `${pendingCount} active controls in flight`,
+      icon: AccountBalanceWalletIcon,
+      color: "#1e40af",
+    },
+    {
+      label: "Approved Collateral",
+      value: fmt(approvedValue),
+      detail: `${completionRate}% completion rate`,
+      icon: FactCheckIcon,
+      color: "#059669",
+    },
+    {
+      label: "Pending Exposure",
+      value: fmt(pendingValue),
+      detail: "Maker, checker, and risk queues",
+      icon: PendingActionsIcon,
+      color: "#d97706",
+    },
+    {
+      label: "Risk Exceptions",
+      value: `${exceptionRate}%`,
+      detail: `${highValueCount} high-value requests flagged`,
+      icon: ShieldOutlinedIcon,
+      color: "#dc2626",
+    },
   ];
 
   return (
     <Box>
-      {/* Recruiter banner */}
-      <Card sx={{
-        mb: 3,
-        background: "linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #1e40af 100%)",
-        color: "white", overflow: "hidden", position: "relative",
-      }}>
-        <Box sx={{
-          position: "absolute", right: -40, top: -40, width: 200, height: 200,
-          borderRadius: "50%", bgcolor: alpha("#fff", 0.03),
-        }} />
-        <Box sx={{
-          position: "absolute", right: 60, bottom: -60, width: 150, height: 150,
-          borderRadius: "50%", bgcolor: alpha("#fff", 0.04),
-        }} />
-        <CardContent sx={{ py: 3, px: { xs: 2.5, sm: 3.5 }, position: "relative" }}>
-          <Stack direction="row" alignItems="flex-start" spacing={1.5}>
-            <InfoOutlinedIcon sx={{ color: "#fbbf24", mt: 0.3, flexShrink: 0 }} />
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5, fontSize: { xs: 15, sm: 18 } }}>
-                Welcome to the Manual Invocation Demo
+      <Card
+        sx={{
+          mb: 3,
+          background: "radial-gradient(circle at 80% 20%, rgba(245,158,11,0.28), transparent 28%), linear-gradient(135deg, #07111f 0%, #10213f 48%, #123f57 100%)",
+          color: "white",
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
+        <Box sx={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)", backgroundSize: "48px 48px", opacity: 0.18 }} />
+        <CardContent sx={{ p: { xs: 2.5, md: 4 }, position: "relative" }}>
+          <Grid container spacing={3} alignItems="center">
+            <Grid size={{ xs: 12, md: 7 }}>
+              <Chip
+                label="Wealth operations control tower"
+                sx={{ mb: 2, bgcolor: alpha("#fbbf24", 0.16), color: "#fde68a", border: "1px solid rgba(251,191,36,0.28)", fontWeight: 800 }}
+              />
+              <Typography variant="h4" sx={{ color: "white", fontSize: { xs: 28, md: 42 }, lineHeight: 1.05, mb: 1.5 }}>
+                Pledged securities invocation with maker-checker controls, risk scoring, and demat readiness.
               </Typography>
-              <Typography sx={{ opacity: 0.75, fontSize: { xs: 12.5, sm: 14 }, lineHeight: 1.6, mb: 2, maxWidth: 680 }}>
-                This is a <strong style={{ color: "#fbbf24" }}>fully interactive mock demo</strong> of a financial pledge invocation workflow used
-                by NBFCs and lending institutions. No login or backend needed — all data is in-memory. Click any step below
-                or use the sidebar to explore each stage.
+              <Typography sx={{ color: alpha("#fff", 0.72), maxWidth: 760, lineHeight: 1.7, mb: 2.5 }}>
+                Explore a synthetic wealth-management workflow that models collateral operations for loan-against-securities portfolios.
+                Every stage is interactive, so reviewers can submit a request, move it through approvals, and inspect how exposure changes.
               </Typography>
               <Stack direction="row" flexWrap="wrap" gap={1}>
-                {steps.map((s) => (
-                  <Button
-                    key={s.n}
-                    size="small"
-                    onClick={() => navigate(s.path)}
-                    sx={{
-                      bgcolor: alpha("#fff", 0.1), color: "white",
-                      border: `1px solid ${alpha("#fff", 0.2)}`,
-                      "&:hover": { bgcolor: alpha("#fff", 0.18) },
-                      fontSize: 12, px: 1.5,
-                    }}
-                    endIcon={<ArrowForwardIcon sx={{ fontSize: "13px !important" }} />}
-                  >
-                    {s.n} · {s.title}
-                  </Button>
-                ))}
+                <Button variant="contained" color="secondary" onClick={() => navigate("/initiate")} endIcon={<ArrowForwardIcon />}>
+                  Start a request
+                </Button>
+                <Button variant="outlined" onClick={() => navigate("/risk")} sx={{ color: "white", borderColor: alpha("#fff", 0.35) }}>
+                  Review risk queue
+                </Button>
               </Stack>
-            </Box>
-          </Stack>
+            </Grid>
+            <Grid size={{ xs: 12, md: 5 }}>
+              <Card sx={{ bgcolor: alpha("#fff", 0.09), border: "1px solid rgba(255,255,255,0.16)", color: "white", boxShadow: "none" }}>
+                <CardContent>
+                  <Stack spacing={2}>
+                    {[
+                      { label: "Largest single exposure", value: fmt(largestExposure), icon: TrendingUpIcon },
+                      { label: "SLA posture", value: pendingCount <= 6 ? "Healthy" : "Attention", icon: SpeedIcon },
+                      { label: "Risk model", value: "LTV + concentration + product rules", icon: HealthAndSafetyIcon },
+                    ].map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <Stack key={item.label} direction="row" spacing={1.5} alignItems="center" sx={{ minWidth: 0 }}>
+                          <Box sx={{ width: 38, height: 38, borderRadius: 2, bgcolor: alpha("#fff", 0.13), display: "grid", placeItems: "center" }}>
+                            <Icon sx={{ color: "#fbbf24" }} />
+                          </Box>
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography sx={{ color: alpha("#fff", 0.55), fontSize: 12 }}>{item.label}</Typography>
+                            <Typography sx={{ fontWeight: 800, overflowWrap: "anywhere", lineHeight: 1.25 }}>{item.value}</Typography>
+                          </Box>
+                        </Stack>
+                      );
+                    })}
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
         </CardContent>
       </Card>
 
-      {/* Stat Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        {statCards.map((s) => {
-          const Icon = s.icon;
+        {executiveCards.map((item) => {
+          const Icon = item.icon;
           return (
-            <Grid item xs={6} sm={4} md={2} key={s.label}>
-              <Card
-                onClick={() => navigate(s.path)}
-                sx={{
-                  cursor: "pointer",
-                  transition: "transform 0.15s, box-shadow 0.15s",
-                  "&:hover": { transform: "translateY(-3px)", boxShadow: 4 },
-                  overflow: "hidden", position: "relative",
-                }}
-              >
-                <Box sx={{
-                  position: "absolute", top: 0, left: 0, right: 0, height: 4,
-                  background: s.gradient,
-                }} />
-                <CardContent sx={{ pt: 2.5, pb: "16px !important", px: 2 }}>
-                  <Box sx={{
-                    width: 38, height: 38, borderRadius: 2,
-                    background: s.gradient, display: "flex",
-                    alignItems: "center", justifyContent: "center", mb: 1.5,
-                  }}>
-                    <Icon sx={{ color: "white", fontSize: 20 }} />
-                  </Box>
-                  <Typography variant="h4" sx={{ fontSize: { xs: 26, sm: 30 }, lineHeight: 1, mb: 0.4 }}>
-                    {s.value}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: 11, lineHeight: 1.3, display: "block" }}>
-                    {s.label}
-                  </Typography>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={item.label}>
+              <Card sx={{ height: "100%", position: "relative", overflow: "hidden" }}>
+                <Box sx={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${alpha(item.color, 0.09)}, transparent 58%)` }} />
+                <CardContent sx={{ position: "relative" }}>
+                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
+                    <Box sx={{ width: 42, height: 42, borderRadius: 2.5, bgcolor: alpha(item.color, 0.12), display: "grid", placeItems: "center" }}>
+                      <Icon sx={{ color: item.color }} />
+                    </Box>
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8 }}>
+                      {item.label}
+                    </Typography>
+                  </Stack>
+                  <Typography variant="h5" sx={{ fontWeight: 900, color: item.color, mb: 0.4 }}>{item.value}</Typography>
+                  <Typography variant="body2" color="text.secondary">{item.detail}</Typography>
                 </CardContent>
               </Card>
             </Grid>
@@ -153,60 +207,27 @@ export default function Dashboard() {
         })}
       </Grid>
 
-      {/* Portfolio value bar */}
-      <Card sx={{ mb: 3, background: "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)", color: "white" }}>
-        <CardContent sx={{ py: 2.5, px: { xs: 2.5, sm: 3.5 }, "&:last-child": { pb: 2.5 } }}>
-          <Stack direction={{ xs: "column", sm: "row" }} alignItems={{ sm: "center" }} spacing={{ xs: 1, sm: 0 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, flex: 1 }}>
-              <Box sx={{
-                width: 44, height: 44, borderRadius: 2.5,
-                bgcolor: alpha("#fff", 0.15), display: "flex",
-                alignItems: "center", justifyContent: "center",
-              }}>
-                <AccountBalanceWalletIcon sx={{ fontSize: 24 }} />
-              </Box>
-              <Box>
-                <Typography sx={{ opacity: 0.7, fontSize: 12, mb: 0.2 }}>Total Portfolio Invocation Value</Typography>
-                <Typography variant="h5" sx={{ fontWeight: 800 }}>{fmt(stats.totalValue)}</Typography>
-              </Box>
-            </Box>
-            <Stack direction="row" spacing={3} sx={{ pl: { sm: 3 } }}>
-              {[
-                { label: "Active", value: stats.pendingMaker + stats.pendingChecker + stats.pendingRisk },
-                { label: "Approved", value: stats.approved },
-                { label: "Rejected", value: stats.rejected },
-              ].map((item) => (
-                <Box key={item.label} sx={{ textAlign: "center" }}>
-                  <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1 }}>{item.value}</Typography>
-                  <Typography sx={{ opacity: 0.6, fontSize: 11 }}>{item.label}</Typography>
-                </Box>
-              ))}
-            </Stack>
-          </Stack>
-        </CardContent>
-      </Card>
-
-      {/* Charts row */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        {/* Bar Chart */}
-        <Grid item xs={12} md={7}>
+        <Grid size={{ xs: 12, lg: 7 }}>
           <Card sx={{ height: "100%" }}>
-            <CardContent sx={{ pb: 1 }}>
-              <Typography variant="subtitle1" sx={{ mb: 0.5 }}>Daily Requests</Typography>
-              <Typography variant="caption" color="text.secondary">April 2025 — Invocation requests submitted per day</Typography>
-              <Box sx={{ mt: 2, height: 220 }}>
+            <CardContent>
+              <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={1} sx={{ mb: 2 }}>
+                <Box>
+                  <Typography variant="subtitle1">Operations Pulse</Typography>
+                  <Typography variant="caption" color="text.secondary">Requests by submission date with live in-memory state</Typography>
+                </Box>
+                <Chip label={`${stats.total} total requests`} variant="outlined" />
+              </Stack>
+              <Box sx={{ height: 240 }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={barData} barSize={isSm ? 24 : 36} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 12, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                    <RechartTooltip
-                      contentStyle={{ borderRadius: 12, border: "none", boxShadow: "0 4px 20px rgba(0,0,0,0.12)", fontSize: 13 }}
-                      cursor={{ fill: "#f1f5f9" }}
-                    />
+                  <BarChart data={dailyData} barSize={isSm ? 24 : 38} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#eef2f7" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
+                    <RechartTooltip contentStyle={{ borderRadius: 12, border: "none", boxShadow: "0 8px 28px rgba(15,23,42,0.14)", fontSize: 13 }} />
                     <Bar dataKey="requests" radius={[8, 8, 0, 0]}>
-                      {barData.map((entry, i) => (
-                        <Cell key={i} fill={i === barData.length - 1 ? "#1e40af" : "#3b82f6"} />
+                      {dailyData.map((entry, i) => (
+                        <Cell key={entry.name} fill={i === dailyData.length - 1 ? "#0f766e" : "#1e40af"} />
                       ))}
                     </Bar>
                   </BarChart>
@@ -216,25 +237,20 @@ export default function Dashboard() {
           </Card>
         </Grid>
 
-        {/* Status breakdown — horizontal bars instead of pie */}
-        <Grid item xs={12} md={5}>
+        <Grid size={{ xs: 12, lg: 5 }}>
           <Card sx={{ height: "100%" }}>
             <CardContent>
-              <Typography variant="subtitle1" sx={{ mb: 0.5 }}>Status Breakdown</Typography>
-              <Typography variant="caption" color="text.secondary">Distribution across all 8 requests</Typography>
+              <Typography variant="subtitle1">Control Queue Mix</Typography>
+              <Typography variant="caption" color="text.secondary">Distribution across workflow states</Typography>
               <Stack spacing={1.8} sx={{ mt: 2.5 }}>
-                {statusData.map((s) => (
-                  <Box key={s.label}>
-                    <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
-                      <Typography variant="caption" sx={{ fontWeight: 600, color: "text.primary" }}>{s.label}</Typography>
-                      <Typography variant="caption" sx={{ color: "text.secondary" }}>{s.value} · {s.pct}%</Typography>
+                {statusData.map((item) => (
+                  <Box key={item.label}>
+                    <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.6 }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700 }}>{item.label}</Typography>
+                      <Typography variant="caption" color="text.secondary">{item.value} · {item.pct}%</Typography>
                     </Stack>
-                    <Box sx={{ height: 8, bgcolor: "#f1f5f9", borderRadius: 4, overflow: "hidden" }}>
-                      <Box sx={{
-                        height: "100%", width: `${s.pct}%`,
-                        bgcolor: s.color, borderRadius: 4,
-                        transition: "width 1s ease",
-                      }} />
+                    <Box sx={{ height: 9, bgcolor: "#f1f5f9", borderRadius: 6, overflow: "hidden" }}>
+                      <Box sx={{ height: "100%", width: `${item.pct}%`, minWidth: item.value ? 12 : 0, bgcolor: item.color, borderRadius: 6 }} />
                     </Box>
                   </Box>
                 ))}
@@ -244,62 +260,129 @@ export default function Dashboard() {
         </Grid>
       </Grid>
 
-      {/* Workflow steps */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="subtitle1" sx={{ mb: 0.5 }}>How to Explore This Demo</Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2.5 }}>
-            Click any stage to jump directly to that screen and try out the approval workflow
-          </Typography>
-          <Grid container spacing={2}>
-            {steps.map((s, i) => (
-              <Grid item xs={12} sm={6} md={3} key={s.n}>
-                <Box
-                  onClick={() => navigate(s.path)}
-                  sx={{
-                    p: 2, borderRadius: 3, border: "1.5px solid #e2e8f0",
-                    cursor: "pointer", transition: "all 0.15s",
-                    "&:hover": {
-                      border: `1.5px solid ${s.color}`,
-                      bgcolor: alpha(s.color, 0.04),
-                      transform: "translateY(-2px)",
-                    },
-                  }}
-                >
-                  <Box sx={{
-                    width: 36, height: 36, borderRadius: 2, bgcolor: alpha(s.color, 0.12),
-                    display: "flex", alignItems: "center", justifyContent: "center", mb: 1.5,
-                  }}>
-                    <Typography sx={{ fontWeight: 800, color: s.color, fontSize: 14 }}>{s.n}</Typography>
-                  </Box>
-                  <Typography variant="subtitle2" sx={{ mb: 0.5 }}>{s.title}</Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5 }}>{s.desc}</Typography>
-                  <Box sx={{ mt: 1.5 }}>
-                    <Typography variant="caption" sx={{ color: s.color, fontWeight: 700, display: "flex", alignItems: "center", gap: 0.5 }}>
-                      Try it <ArrowForwardIcon sx={{ fontSize: 12 }} />
-                    </Typography>
-                  </Box>
+      <Grid container spacing={2.5} sx={{ mb: 3 }}>
+        <Grid size={{ xs: 12, md: 5 }}>
+          <Card sx={{ height: "100%", border: `1px solid ${alpha(suggestedBand.color, 0.22)}` }}>
+            <CardContent>
+              <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
+                <Box sx={{ width: 42, height: 42, borderRadius: 2.5, bgcolor: "#eff6ff", display: "grid", placeItems: "center" }}>
+                  <InsightsIcon sx={{ color: "#1e40af" }} />
                 </Box>
+                <Box>
+                  <Typography variant="subtitle1">Collateral Scenario Lab</Typography>
+                  <Typography variant="caption" color="text.secondary">Experiment with haircut and loan exposure</Typography>
+                </Box>
+              </Stack>
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField
+                    label="Quantity"
+                    type="number"
+                    fullWidth
+                    value={scenario.quantity}
+                    onChange={(e) => setScenario((prev) => ({ ...prev, quantity: e.target.value }))}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField
+                    label="CMP"
+                    type="number"
+                    fullWidth
+                    value={scenario.cmp}
+                    onChange={(e) => setScenario((prev) => ({ ...prev, cmp: e.target.value }))}
+                    InputProps={{ startAdornment: <InputAdornment position="start">₹</InputAdornment> }}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <Typography variant="caption" sx={{ fontWeight: 700 }}>Risk haircut: {scenario.haircut}%</Typography>
+                  <Slider
+                    value={Number(scenario.haircut)}
+                    min={0}
+                    max={50}
+                    step={1}
+                    onChange={(_, value) => setScenario((prev) => ({ ...prev, haircut: value }))}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <TextField
+                    label="Loan outstanding"
+                    type="number"
+                    fullWidth
+                    value={scenario.loanOutstanding}
+                    onChange={(e) => setScenario((prev) => ({ ...prev, loanOutstanding: e.target.value }))}
+                    InputProps={{ startAdornment: <InputAdornment position="start">₹</InputAdornment> }}
+                  />
+                </Grid>
               </Grid>
-            ))}
-          </Grid>
-        </CardContent>
-      </Card>
+              <Box sx={{ mt: 2.5, p: 2, borderRadius: 3, bgcolor: suggestedBand.bg, border: `1px solid ${alpha(suggestedBand.color, 0.28)}` }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                  <Typography variant="caption" color="text.secondary">Post-haircut collateral</Typography>
+                  <Chip label={suggestedBand.label} size="small" sx={{ bgcolor: "white", color: suggestedBand.color, fontWeight: 800 }} />
+                </Stack>
+                <Typography variant="h5" sx={{ color: suggestedBand.color, fontWeight: 900 }}>{fmt(postHaircutValue)}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Coverage ratio: <strong>{coverageRatio.toFixed(2)}x</strong> against outstanding loan.
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
 
-      {/* Recent requests table */}
+        <Grid size={{ xs: 12, md: 7 }}>
+          <Card sx={{ height: "100%" }}>
+            <CardContent>
+              <Typography variant="subtitle1">Operational Workflow</Typography>
+              <Typography variant="caption" color="text.secondary">Navigate through approval stages</Typography>
+              <Grid container spacing={1.5} sx={{ mt: 1 }}>
+                {steps.map((step) => (
+                  <Grid size={{ xs: 12, sm: 6 }} key={step.n}>
+                    <Box
+                      onClick={() => navigate(step.path)}
+                      sx={{
+                        p: 2,
+                        height: "100%",
+                        borderRadius: 3,
+                        border: "1px solid #e2e8f0",
+                        cursor: "pointer",
+                        transition: "all 0.18s ease",
+                        "&:hover": { borderColor: step.color, bgcolor: alpha(step.color, 0.04), transform: "translateY(-2px)" },
+                      }}
+                    >
+                      <Stack direction="row" spacing={1.2} alignItems="flex-start">
+                        <Box sx={{ width: 38, height: 38, borderRadius: 2, bgcolor: alpha(step.color, 0.12), display: "grid", placeItems: "center", flexShrink: 0 }}>
+                          <Typography sx={{ color: step.color, fontWeight: 900 }}>{step.n}</Typography>
+                        </Box>
+                        <Box>
+                          <Typography variant="subtitle2">{step.title}</Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5 }}>{step.desc}</Typography>
+                          <Typography variant="caption" sx={{ mt: 1, color: step.color, fontWeight: 800, display: "flex", alignItems: "center", gap: 0.5 }}>
+                            Open stage <ArrowForwardIcon sx={{ fontSize: 13 }} />
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
       <Card>
         <CardContent>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ sm: "center" }} sx={{ mb: 2 }} spacing={1}>
             <Box>
-              <Typography variant="subtitle1">Recent Requests</Typography>
-              <Typography variant="caption" color="text.secondary">Latest invocation submissions across all stages</Typography>
+              <Typography variant="subtitle1">Recent Invocation Requests</Typography>
+              <Typography variant="caption" color="text.secondary">Operational snapshot with value, product, and status</Typography>
             </Box>
             <Button size="small" endIcon={<ArrowForwardIcon />} onClick={() => navigate("/initiate")}>
-              View All
+              View request ledger
             </Button>
           </Stack>
           <TableContainer>
-            <Table size="small">
+            <Table size="small" sx={{ minWidth: 860 }}>
               <TableHead>
                 <TableRow>
                   {["Request ID", "Client", "Scrip", "Qty", "CMP", "Value", "Product", "Status"].map((h) => (
@@ -310,31 +393,13 @@ export default function Dashboard() {
               <TableBody>
                 {invocations.slice(0, 6).map((row) => (
                   <TableRow key={row.id}>
-                    <TableCell>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: "primary.main", fontFamily: "monospace" }}>
-                        {row.id}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption" sx={{ fontWeight: 600 }}>{row.clientName}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption">{row.scripName}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption">{row.quantity.toLocaleString("en-IN")}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption">₹{row.cmp.toLocaleString("en-IN")}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                        ₹{(row.quantity * row.cmp).toLocaleString("en-IN", { maximumFractionDigits: 0 })}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip label={row.product} size="small" variant="outlined" sx={{ fontSize: 10 }} />
-                    </TableCell>
+                    <TableCell sx={{ fontFamily: "monospace", fontWeight: 800, color: "#1e40af", fontSize: 12 }}>{row.id}</TableCell>
+                    <TableCell sx={{ fontSize: 12, fontWeight: 700 }}>{row.clientName}</TableCell>
+                    <TableCell sx={{ fontSize: 12 }}>{row.scripName}</TableCell>
+                    <TableCell sx={{ fontSize: 12 }}>{row.quantity.toLocaleString("en-IN")}</TableCell>
+                    <TableCell sx={{ fontSize: 12 }}>₹{row.cmp.toLocaleString("en-IN")}</TableCell>
+                    <TableCell sx={{ fontSize: 12, fontWeight: 800 }}>{fmt(getRequestValue(row))}</TableCell>
+                    <TableCell><Chip label={row.product || "LAS"} size="small" variant="outlined" sx={{ fontSize: 10 }} /></TableCell>
                     <TableCell><StatusChip status={row.status} /></TableCell>
                   </TableRow>
                 ))}

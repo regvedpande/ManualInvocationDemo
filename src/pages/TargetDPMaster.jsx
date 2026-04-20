@@ -9,7 +9,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
-import { AppContext } from "../context/AppContext";
+import { AppContext } from "../context/InvocationContext";
 import PageHeader from "../components/PageHeader";
 
 const empty = { entityName: "", dpId: "", clientId: "", bank: "", ifsc: "", accountNo: "" };
@@ -61,10 +61,7 @@ export default function TargetDPMaster() {
         color="#059669"
       />
 
-      <Alert severity="info" sx={{ mb: 2.5 }}>
-        <strong>Demo tip:</strong> Add a new Target DP account, then click <strong>Activate</strong> to approve it.
-        Active accounts are used as the destination for invoked securities.
-      </Alert>
+
 
       {/* Summary */}
       <Stack direction="row" spacing={1.5} sx={{ mb: 2.5 }}>
@@ -155,7 +152,7 @@ export default function TargetDPMaster() {
           <Grid container spacing={2.5}>
             <Grid item xs={12}>
               <LF label="Entity Name *">
-                <TextField fullWidth name="entityName" value={form.entityName} onChange={handleChange} placeholder="e.g. FinSmart NBFC Ltd" />
+                <TextField fullWidth name="entityName" value={form.entityName} onChange={handleChange} placeholder="e.g. Aureon Wealth Custody" />
               </LF>
             </Grid>
             <Grid item xs={6}>

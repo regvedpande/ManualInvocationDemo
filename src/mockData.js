@@ -58,17 +58,17 @@ export const invocations = [
 ];
 
 export const targetDPs = [
-  { id: 1, entityName: "FinSmart NBFC Ltd", dpId: "IN300095", clientId: "IN30009511223344", bank: "HDFC Bank", ifsc: "HDFC0001234", accountNo: "50100123456789", status: "Active" },
-  { id: 2, entityName: "FinSmart Capital", dpId: "IN301330", clientId: "IN30133011223345", bank: "ICICI Bank", ifsc: "ICIC0001234", accountNo: "123456789012", status: "Active" },
-  { id: 3, entityName: "FinSmart Investments", dpId: "IN302269", clientId: "IN30226911223346", bank: "Axis Bank", ifsc: "UTIB0001234", accountNo: "910010012345678", status: "Pending" },
+  { id: 1, entityName: "Aureon Wealth Custody", dpId: "IN300095", clientId: "IN30009511223344", bank: "HDFC Bank", ifsc: "HDFC0001234", accountNo: "50100123456789", status: "Active" },
+  { id: 2, entityName: "Aureon Capital Markets", dpId: "IN301330", clientId: "IN30133011223345", bank: "ICICI Bank", ifsc: "ICIC0001234", accountNo: "123456789012", status: "Active" },
+  { id: 3, entityName: "Aureon Private Credit", dpId: "IN302269", clientId: "IN30226911223346", bank: "Axis Bank", ifsc: "UTIB0001234", accountNo: "910010012345678", status: "Pending" },
 ];
 
 export const auditLog = [
-  { id: 1, invocationId: "INV-001", action: "Submitted", user: "initiator@finsmart.com", timestamp: "2025-04-01 09:15:00", remarks: "Initial submission" },
-  { id: 2, invocationId: "INV-002", action: "Maker Approved", user: "maker@finsmart.com", timestamp: "2025-04-02 11:30:00", remarks: "Documents verified" },
-  { id: 3, invocationId: "INV-003", action: "Checker Approved", user: "checker@finsmart.com", timestamp: "2025-04-02 14:45:00", remarks: "All checks passed" },
-  { id: 4, invocationId: "INV-004", action: "Risk Approved", user: "risk@finsmart.com", timestamp: "2025-04-03 16:20:00", remarks: "All clear" },
-  { id: 5, invocationId: "INV-005", action: "Rejected", user: "risk@finsmart.com", timestamp: "2025-04-03 17:00:00", remarks: "Documents incomplete" },
+  { id: 1, invocationId: "INV-001", action: "Submitted", user: "initiator@aureonwealth.example", timestamp: "2025-04-01 09:15:00", remarks: "Initial submission" },
+  { id: 2, invocationId: "INV-002", action: "Maker Approved", user: "maker@aureonwealth.example", timestamp: "2025-04-02 11:30:00", remarks: "Documents verified" },
+  { id: 3, invocationId: "INV-003", action: "Checker Approved", user: "checker@aureonwealth.example", timestamp: "2025-04-02 14:45:00", remarks: "All checks passed" },
+  { id: 4, invocationId: "INV-004", action: "Risk Approved", user: "risk@aureonwealth.example", timestamp: "2025-04-03 16:20:00", remarks: "All clear" },
+  { id: 5, invocationId: "INV-005", action: "Rejected", user: "risk@aureonwealth.example", timestamp: "2025-04-03 17:00:00", remarks: "Documents incomplete" },
 ];
 
 export const stats = {

@@ -12,8 +12,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import SearchIcon from "@mui/icons-material/Search";
 import SecurityIcon from "@mui/icons-material/Security";
 import AutoModeIcon from "@mui/icons-material/AutoMode";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import { AppContext } from "../context/AppContext";
+import { AppContext } from "../context/InvocationContext";
 import PageHeader from "../components/PageHeader";
 
 const DetailRow = ({ label, value }) => (
@@ -66,8 +65,8 @@ export default function RiskApproval() {
     updateStatus(selected.id, action === "approve" ? "Approved" : "Rejected", remarks);
     setConfirmOpen(false);
     setSnack(action === "approve"
-      ? `🎉 ${selected.id} — Final approval granted! Invocation complete.`
-      : `✗ ${selected.id} rejected at Risk stage`
+      ? `Approved: ${selected.id} received final risk sign-off`
+      : `Rejected: ${selected.id} was stopped at Risk review`
     );
   };
 
@@ -75,7 +74,7 @@ export default function RiskApproval() {
     const low = pendingRisk.filter((r) => riskScore(r) < 60);
     low.forEach((r) => updateStatus(r.id, "Approved", "Auto-approved (low risk score < 60)"));
     setSnack(low.length > 0
-      ? `🤖 Auto-approved ${low.length} low-risk request(s)`
+      ? `Auto-approved ${low.length} low-risk request(s)`
       : "No low-risk requests to auto-approve right now"
     );
   };
@@ -141,10 +140,7 @@ export default function RiskApproval() {
         </CardContent>
       </Card>
 
-      <Alert severity="warning" sx={{ mb: 2.5 }}>
-        <strong>Demo tip:</strong> This is the <strong>final stage</strong>. Approving here sets status to <strong>Approved</strong> and the invocation is complete.
-        {pendingRisk.length === 0 && " Go through Maker → Checker first to get requests here."}
-      </Alert>
+
 
       {/* Stats row */}
       <Stack direction="row" spacing={1.5} sx={{ mb: 2.5 }} flexWrap="wrap">
@@ -343,7 +339,7 @@ export default function RiskApproval() {
       </Dialog>
 
       <Snackbar open={!!snack} autoHideDuration={5000} onClose={() => setSnack(null)} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
-        <Alert severity={snack?.startsWith("✗") ? "error" : "success"} onClose={() => setSnack(null)} sx={{ fontWeight: 600 }}>
+        <Alert severity={snack?.startsWith("Rejected") ? "error" : "success"} onClose={() => setSnack(null)} sx={{ fontWeight: 600 }}>
           {snack}
         </Alert>
       </Snackbar>

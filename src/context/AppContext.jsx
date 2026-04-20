@@ -1,7 +1,6 @@
-import React, { createContext, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { invocations as seed, targetDPs as seedDPs } from "../mockData";
-
-export const AppContext = createContext(null);
+import { AppContext } from "./InvocationContext";
 
 let idCounter = seed.length + 1;
 

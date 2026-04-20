@@ -3,7 +3,7 @@ import {
   Box, Card, CardContent, Typography, Table, TableBody, TableCell,
   TableHead, TableRow, Button, Dialog, DialogTitle, DialogContent,
   DialogActions, TextField, Grid, Alert, Snackbar, Stack,
-  InputAdornment, Chip, alpha, Divider,
+  InputAdornment, Chip, Divider,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -11,9 +11,8 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import DownloadIcon from "@mui/icons-material/Download";
-import { AppContext } from "../context/AppContext";
+import { AppContext } from "../context/InvocationContext";
 import PageHeader from "../components/PageHeader";
-import StatusChip from "../components/StatusChip";
 
 const DetailRow = ({ label, value }) => (
   <Grid item xs={6} sm={4}>
@@ -51,8 +50,8 @@ export default function AccountMaker() {
     updateStatus(selected.id, newStatus, remarks);
     setConfirmOpen(false);
     setSnack(action === "approve"
-      ? `✓ ${selected.id} approved — now in Checker queue`
-      : `✗ ${selected.id} rejected`
+      ? `Approved: ${selected.id} is now in the Checker queue`
+      : `Rejected: ${selected.id} was stopped at Maker review`
     );
   };
 
@@ -65,11 +64,7 @@ export default function AccountMaker() {
         color="#d97706"
       />
 
-      {/* How-to tip */}
-      <Alert severity="warning" sx={{ mb: 2.5 }}>
-        <strong>Demo tip:</strong> Click <strong>Approve</strong> on any request below — it will instantly appear in the <strong>Account Checker</strong> queue.
-        Click <strong>Reject</strong> to terminate the request with a reason.
-      </Alert>
+
 
       <Card>
         <CardContent>
@@ -251,7 +246,7 @@ export default function AccountMaker() {
 
       <Snackbar open={!!snack} autoHideDuration={4000} onClose={() => setSnack(null)} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
         <Alert
-          severity={snack?.startsWith("✗") ? "error" : "success"}
+          severity={snack?.startsWith("Rejected") ? "error" : "success"}
           onClose={() => setSnack(null)}
           sx={{ fontWeight: 600 }}
         >

@@ -1,102 +1,86 @@
-# Manual Invocation — Interactive Demo
+# Aureon Wealth Ops — Collateral Invocation Sandbox
 
-> **Live Demo:** [View on Vercel →](https://manual-invocation-demo.vercel.app)
+> **Live App:** [View on Vercel](https://manual-invocation-demo.vercel.app)
 
-A fully interactive mock demo of a **financial pledge invocation workflow** used by NBFCs and lending institutions in India. Built to demonstrate real-world enterprise fintech UX — no backend, no login required.
+A fully interactive wealth-management operations sandbox for **pledged securities invocation**. It models how a loan-against-securities desk can create an invocation request, validate it through maker-checker controls, perform risk review, and manage target demat accounts before final execution.
 
----
-
-## What Is Pledge Invocation?
-
-When a borrower takes a loan against pledged shares and defaults, the lender must **invoke** (claim) those shares. This system manages the **Manual Invocation workflow** — the multi-stage approval process that governs this operation.
+The app is intentionally frontend-only and uses synthetic in-memory data, so anyone can explore the workflow without credentials, seed scripts, or backend setup.
 
 ---
 
-## Approval Workflow
+## Why This Exists
+
+When a borrower defaults on a loan backed by pledged shares, the lender may need to invoke or claim those securities. In a real institution, that action requires strict operational controls:
+
+- Collateral and loan validation
+- Maker-checker approval
+- Risk assessment and exception handling
+- Demat destination configuration
+- Audit-ready status transitions
+
+This project turns that process into a polished product experience that is easy to test and understand.
+
+---
+
+## Product Highlights
+
+- **Executive command center:** Tracks total invocation exposure, approved collateral, pending exposure, risk exceptions, and largest single exposure.
+- **Collateral scenario lab:** Lets users experiment with quantity, current market price, haircut, and loan outstanding to understand coverage and escalation bands.
+- **Interactive workflow queues:** Requests move live from Initiation to Maker, Checker, Risk, and Approved or Rejected states.
+- **Risk scoring:** Risk review uses a transparent score based on quantity, price, product, and concentration-style thresholds.
+- **Auto-approval mode:** Low-risk requests can be batch-approved from the Risk queue to demonstrate rule-driven operations.
+- **Target DP master:** Users can add, activate, and remove destination demat accounts used for invoked securities.
+- **Pre-loaded scenarios:** Example requests are available to demonstrate the full workflow instantaneously.
+
+---
+
+## Workflow
 
 ```mermaid
 flowchart LR
-    A([Initiator\nSubmits Request]) --> B{Account Maker\nReview}
-    B -->|Approve| C{Account Checker\nReview}
-    B -->|Reject| R([❌ Rejected])
-    C -->|Approve| D{Risk Team\nFinal Approval}
-    C -->|Reject| R
-    D -->|Approve| E([✅ Invocation\nExecuted])
-    D -->|Reject| R
+    A(["Initiator creates invocation"]) --> B{"Account Maker review"}
+    B -->|"Approve"| C{"Account Checker review"}
+    B -->|"Reject"| R(["Rejected"])
+    C -->|"Approve"| D{"Risk approval"}
+    C -->|"Reject"| R
+    D -->|"Approve"| E(["Invocation approved"])
+    D -->|"Reject"| R
 
-    style A fill:#3b82f6,color:#fff,stroke:none
-    style B fill:#f59e0b,color:#fff,stroke:none
-    style C fill:#8b5cf6,color:#fff,stroke:none
+    style A fill:#1e40af,color:#fff,stroke:none
+    style B fill:#d97706,color:#fff,stroke:none
+    style C fill:#7c3aed,color:#fff,stroke:none
     style D fill:#0369a1,color:#fff,stroke:none
     style E fill:#059669,color:#fff,stroke:none
     style R fill:#dc2626,color:#fff,stroke:none
 ```
 
----
+## System Overview
 
-## System Architecture
+### Core Components
 
-```mermaid
-graph TD
-    subgraph Frontend ["Frontend (This Demo)"]
-        UI[React + Material UI]
-        CTX[AppContext — Global State]
-        UI <--> CTX
-    end
+- **Dashboard:** Real-time operations view showing exposure metrics, queue health, and collateral modeling tools.
+- **Initiation:** Request creation with structured data capture for client, collateral, loan, and demat details.
+- **Maker Review:** First-level validation and approval with document verification context.
+- **Checker Review:** Independent four-eye review and secondary approval for risk mitigation.
+- **Risk Approval:** Final risk assessment using transparent scoring rules, with auto-approval for low-risk items.
+- **Target DP Master:** Demat account lifecycle management (register, activate, retire).
 
-    subgraph Pages
-        P1[Dashboard]
-        P2[Initiate Invocation]
-        P3[Account Maker]
-        P4[Account Checker]
-        P5[Risk Approval]
-        P6[Target DP Master]
-    end
+### Data Flow
 
-    subgraph Backend ["Backend (ASP.NET Core 6 — Actual System)"]
-        API[REST API Controllers]
-        DAL[DAL — Raw ADO.NET]
-        DB[(SQL Server\nStored Procedures)]
-        API --> DAL --> DB
-    end
-
-    CTX --> P1 & P2 & P3 & P4 & P5 & P6
-    UI -.->|"HTTP + AuthToken header"| API
-```
+All state updates occur in real-time across the React Context without requiring backend calls. Requests progress through approval stages, and each transition is immediately reflected across all views. The synthetic dataset includes pre-configured demat accounts and sample client data for rapid exploration.
 
 ---
 
-## Data Flow
+## Usage
 
-```mermaid
-sequenceDiagram
-    participant I as Initiator
-    participant M as Account Maker
-    participant C as Account Checker
-    participant R as Risk Team
-    participant SYS as System
+The application provides pre-loaded example requests that can be submitted and progressed through the complete approval workflow. Users can:
 
-    I->>SYS: Submit invocation (ISIN, Qty, CMP, Docs)
-    SYS-->>M: New request in Maker queue
-    M->>SYS: Approve / Reject with remarks
-    alt Approved by Maker
-        SYS-->>C: Request moves to Checker queue
-        C->>SYS: Approve / Reject with remarks
-        alt Approved by Checker
-            SYS-->>R: Request moves to Risk queue
-            R->>SYS: Final Approve / Reject
-            alt Final Approved
-                SYS-->>I: ✅ Invocation Executed
-            else Rejected
-                SYS-->>I: ❌ Rejected at Risk
-            end
-        else Rejected
-            SYS-->>I: ❌ Rejected at Checker
-        end
-    else Rejected
-        SYS-->>I: ❌ Rejected at Maker
-    end
-```
+1. **Analyze metrics** on the Dashboard using the collateral scenario tool to model different haircut and loan levels.
+2. **Create and submit** invocation requests with full demat and client context.
+3. **Review and approve** requests at each control stage with structured workflows.
+4. **Manage demat destinations** for securities transfer.
+
+No authentication or backend infrastructure is required—all logic is client-side.
 
 ---
 
@@ -104,16 +88,16 @@ sequenceDiagram
 
 | Term | Meaning |
 |---|---|
-| **ISIN** | International Securities Identification Number — uniquely identifies a stock |
-| **Pledger** | The borrower who pledged shares as loan collateral |
-| **Pledgee** | The lender (NBFC/bank) holding the pledge |
-| **DP ID / Client ID** | Depository Participant ID + account number in CDSL/NSDL |
-| **CMP** | Current Market Price of the pledged share |
-| **Invocation** | The act of the lender claiming the pledged shares |
-| **PSN** | Pledge Sequence Number — unique ID for the pledge transaction |
-| **Drawing Power** | Maximum loan amount drawable against the collateral |
-| **UTR** | Unique Transaction Reference — bank transaction identifier |
-| **Maker-Checker** | Dual-control: one person initiates, another approves |
+| **ISIN** | International Securities Identification Number used to identify a listed security |
+| **Pledger** | Borrower whose securities are pledged as collateral |
+| **Pledgee** | Lender or institution holding the pledge |
+| **DP ID / Client ID** | Depository participant and demat account identifiers |
+| **CMP** | Current market price of the security |
+| **Haircut** | Risk discount applied to collateral value |
+| **Coverage ratio** | Post-haircut collateral value divided by loan outstanding |
+| **Invocation** | Operational act of claiming pledged securities |
+| **Maker-checker** | Dual-control approval pattern used in financial operations |
+| **Target DP** | Destination demat account where invoked securities are transferred |
 
 ---
 
@@ -121,50 +105,35 @@ sequenceDiagram
 
 | Layer | Technology |
 |---|---|
-| UI Framework | React 18 + Vite |
-| Component Library | Material UI v5 |
+| UI | React 19 + Vite |
+| Components | Material UI 7 |
 | Charts | Recharts |
-| Routing | React Router v6 |
+| Routing | React Router 7 |
 | State | React Context API |
-| Deploy | Vercel |
-| Backend (real system) | ASP.NET Core 6.0 |
-| Database (real system) | Microsoft SQL Server + Stored Procedures |
-| Auth (real system) | Custom `AuthToken` header → `TOKEN_VALIDATE` SP |
-
----
-
-## How to Explore the Demo
-
-1. **Dashboard** — See live stats and the workflow guide
-2. **Initiate Invocation** → Fill the form and submit a new request
-3. **Account Maker** → Approve the request (it moves to Checker)
-4. **Account Checker** → Approve again (it moves to Risk)
-5. **Risk Approval** → Give final approval (status becomes ✅ Approved)
-6. **Target DP Master** → Add/manage destination demat accounts
-
-> All state is live in-memory — approvals in one tab update counts in the sidebar badges immediately.
+| Deployment | Vercel |
 
 ---
 
 ## Project Structure
 
-```
+```text
 src/
-├── context/
-│   └── AppContext.jsx        ← Global state (invocations, CRUD, derived views)
 ├── components/
-│   ├── Layout.jsx            ← Responsive sidebar + topbar
-│   ├── StatusChip.jsx        ← Colour-coded status badges
-│   └── PageHeader.jsx        ← Consistent page headers
+│   ├── Layout.jsx
+│   ├── PageHeader.jsx
+│   └── StatusChip.jsx
+├── context/
+│   └── AppContext.jsx
 ├── pages/
-│   ├── Dashboard.jsx         ← Stats, charts, workflow guide
+│   ├── Dashboard.jsx
 │   ├── InvocationInitiation.jsx
 │   ├── AccountMaker.jsx
 │   ├── AccountChecker.jsx
-│   ├── RiskApproval.jsx      ← Risk scoring + auto-approve mode
+│   ├── RiskApproval.jsx
 │   └── TargetDPMaster.jsx
-├── mockData.js               ← Seed data (8 requests, 3 target DPs)
-└── theme.js                  ← MUI theme (Inter font, custom palette)
+├── mockData.js
+├── theme.js
+└── main.jsx
 ```
 
 ---
@@ -176,8 +145,17 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173)
+Open [http://localhost:5173](http://localhost:5173).
+
+For production verification:
+
+```bash
+npm run lint
+npm run build
+```
 
 ---
 
-*Built as a portfolio demo. The backend (ASP.NET Core + SQL Server) is a separate production system by CYLSYS for FinSmart.*
+## Notes
+
+This is a synthetic product sandbox. It does not connect to a real broker, depository, bank, or production loan system, and it does not store personal or financial data.

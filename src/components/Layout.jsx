@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { AppContext } from "../context/AppContext";
+import { AppContext } from "../context/InvocationContext";
 import {
   Box, Drawer, AppBar, Toolbar, Typography, List, ListItem,
   ListItemButton, ListItemIcon, ListItemText, Divider, Avatar,
@@ -64,13 +64,13 @@ function SidebarContent({ navigate, location, onClose, badges }) {
             display: "flex", alignItems: "center", justifyContent: "center",
             boxShadow: "0 4px 12px rgba(245,158,11,0.4)",
           }}>
-            <Typography sx={{ fontWeight: 900, color: "#1e40af", fontSize: 15 }}>MI</Typography>
+            <Typography sx={{ fontWeight: 900, color: "#1e40af", fontSize: 15 }}>AW</Typography>
           </Box>
           <Box>
             <Typography sx={{ fontWeight: 800, color: "white", fontSize: 14, lineHeight: 1.2 }}>
-              Manual Invocation
+              Aureon Wealth Ops
             </Typography>
-            <Typography sx={{ color: alpha("#fff", 0.5), fontSize: 11 }}>FinSmart · Securities Platform</Typography>
+            <Typography sx={{ color: alpha("#fff", 0.5), fontSize: 11 }}>Collateral control platform</Typography>
           </Box>
         </Box>
 
@@ -160,19 +160,19 @@ function SidebarContent({ navigate, location, onClose, badges }) {
 
       <Divider sx={{ borderColor: alpha("#fff", 0.08) }} />
 
-      {/* Demo user */}
+      {/* Sandbox user */}
       <Box sx={{ p: 2 }}>
         <Box sx={{
           display: "flex", alignItems: "center", gap: 1.5,
           bgcolor: alpha("#fff", 0.07), borderRadius: 2.5, p: 1.5,
         }}>
-          <Avatar sx={{ width: 34, height: 34, bgcolor: "#f59e0b", fontSize: 13, fontWeight: 700 }}>RK</Avatar>
+          <Avatar sx={{ width: 34, height: 34, bgcolor: "#f59e0b", fontSize: 13, fontWeight: 700 }}>AM</Avatar>
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography sx={{ color: "white", fontWeight: 700, fontSize: 12.5, lineHeight: 1.2 }}>Rahul Kumar</Typography>
-            <Typography sx={{ color: alpha("#fff", 0.45), fontSize: 10.5 }}>All Roles · Demo Mode</Typography>
+            <Typography sx={{ color: "white", fontWeight: 700, fontSize: 12.5, lineHeight: 1.2 }}>Aarav Mehta</Typography>
+            <Typography sx={{ color: alpha("#fff", 0.45), fontSize: 10.5 }}>All Roles · Sandbox Mode</Typography>
           </Box>
           <Chip
-            label="LIVE"
+            label="LAB"
             size="small"
             sx={{ bgcolor: "#059669", color: "white", fontSize: 9, height: 18, fontWeight: 700 }}
           />
@@ -235,7 +235,7 @@ export default function Layout({ children }) {
       )}
 
       {/* Main Content */}
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, width: "100%" }}>
         {/* Topbar */}
         <AppBar
           position="sticky"
@@ -261,10 +261,10 @@ export default function Layout({ children }) {
               </Typography>
             </Box>
 
-            <Tooltip title="This is a fully interactive mock demo — no real data">
+            <Tooltip title="Interactive sandbox with synthetic data only">
               <Chip
                 icon={<PlayCircleOutlineIcon sx={{ fontSize: "14px !important" }} />}
-                label="Interactive Demo"
+                label="Product Sandbox"
                 size="small"
                 sx={{
                   bgcolor: "#eff6ff", color: "#1e40af", fontWeight: 700,
@@ -274,12 +274,12 @@ export default function Layout({ children }) {
               />
             </Tooltip>
 
-            <Avatar sx={{ width: 32, height: 32, bgcolor: "#f59e0b", fontSize: 12, fontWeight: 700 }}>RK</Avatar>
+            <Avatar sx={{ width: 32, height: 32, bgcolor: "#f59e0b", fontSize: 12, fontWeight: 700 }}>AM</Avatar>
           </Toolbar>
         </AppBar>
 
         {/* Page content */}
-        <Box sx={{ flex: 1, overflow: "auto", p: { xs: 2, sm: 3 } }}>
+        <Box sx={{ flex: 1, overflow: "auto", p: { xs: 2, sm: 3 }, width: "100%", boxSizing: "border-box" }}>
           {children}
         </Box>
       </Box>
