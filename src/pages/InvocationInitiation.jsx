@@ -142,36 +142,36 @@ export default function InvocationInitiation() {
               />
             </Stack>
             <Grid container spacing={2.5}>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <LabelledField label="Client Name *">
                   <TextField select fullWidth name="clientName" value={form.clientName} onChange={handleChange} placeholder="Select client">
                     {clients.map((c) => <MenuItem key={c} value={c}>{c}</MenuItem>)}
                   </TextField>
                 </LabelledField>
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <LabelledField label="PAN">
                   <TextField fullWidth name="pan" value={form.pan} onChange={handleChange} placeholder="ABCDE1234F" inputProps={{ maxLength: 10, style: { textTransform: "uppercase" } }} />
                 </LabelledField>
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <LabelledField label="Scrip Name *">
                   <TextField select fullWidth name="scripName" value={form.scripName} onChange={handleChange} placeholder="Select scrip">
                     {scrips.map((s) => <MenuItem key={s.name} value={s.name}>{s.name}</MenuItem>)}
                   </TextField>
                 </LabelledField>
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <LabelledField label="ISIN">
                   <TextField fullWidth name="isin" value={form.isin} onChange={handleChange} placeholder="Auto-filled from scrip" />
                 </LabelledField>
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <LabelledField label="Quantity *">
                   <TextField fullWidth name="quantity" value={form.quantity} onChange={handleChange} type="number" placeholder="e.g. 500" />
                 </LabelledField>
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <LabelledField label="Current Market Price (₹) *">
                   <TextField
                     fullWidth name="cmp" value={form.cmp} onChange={handleChange} type="number"
@@ -180,12 +180,12 @@ export default function InvocationInitiation() {
                   />
                 </LabelledField>
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <LabelledField label="Loan Code *">
                   <TextField fullWidth name="loanCode" value={form.loanCode} onChange={handleChange} placeholder="e.g. LC-9901" />
                 </LabelledField>
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <LabelledField label="Product">
                   <TextField select fullWidth name="product" value={form.product} onChange={handleChange}>
                     <MenuItem value="">Select...</MenuItem>
@@ -193,22 +193,22 @@ export default function InvocationInitiation() {
                   </TextField>
                 </LabelledField>
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <LabelledField label="UTR Number">
                   <TextField fullWidth name="utr" value={form.utr} onChange={handleChange} placeholder="e.g. UTR20250401001" />
                 </LabelledField>
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <LabelledField label="Pledger DP ID">
                   <TextField fullWidth name="pledgerDpId" value={form.pledgerDpId} onChange={handleChange} />
                 </LabelledField>
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <LabelledField label="Pledger Client ID">
                   <TextField fullWidth name="pledgerClientId" value={form.pledgerClientId} onChange={handleChange} />
                 </LabelledField>
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <LabelledField label="Supporting Document">
                   <Button
                     variant="outlined" component="label" startIcon={<UploadFileIcon />} fullWidth

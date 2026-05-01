@@ -150,32 +150,32 @@ export default function TargetDPMaster() {
         </DialogTitle>
         <DialogContent sx={{ pt: 3 }}>
           <Grid container spacing={2.5}>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <LF label="Entity Name *">
                 <TextField fullWidth name="entityName" value={form.entityName} onChange={handleChange} placeholder="e.g. Aureon Wealth Custody" />
               </LF>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <LF label="DP ID *">
                 <TextField fullWidth name="dpId" value={form.dpId} onChange={handleChange} placeholder="e.g. IN300095" />
               </LF>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <LF label="Client ID *">
                 <TextField fullWidth name="clientId" value={form.clientId} onChange={handleChange} placeholder="e.g. IN30009511223344" />
               </LF>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <LF label="Bank Name">
                 <TextField fullWidth name="bank" value={form.bank} onChange={handleChange} placeholder="e.g. HDFC Bank" />
               </LF>
             </Grid>
-            <Grid item xs={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <LF label="IFSC Code">
                 <TextField fullWidth name="ifsc" value={form.ifsc} onChange={handleChange} placeholder="e.g. HDFC0001234" />
               </LF>
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <LF label="Account Number">
                 <TextField fullWidth name="accountNo" value={form.accountNo} onChange={handleChange} placeholder="e.g. 50100123456789" />
               </LF>

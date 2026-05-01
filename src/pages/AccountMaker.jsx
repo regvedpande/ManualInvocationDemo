@@ -15,7 +15,7 @@ import { AppContext } from "../context/InvocationContext";
 import PageHeader from "../components/PageHeader";
 
 const DetailRow = ({ label, value }) => (
-  <Grid item xs={6} sm={4}>
+  <Grid size={{ xs: 6, sm: 4 }}>
     <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.3 }}>{label}</Typography>
     <Typography variant="body2" sx={{ fontWeight: 600 }}>{value || "—"}</Typography>
   </Grid>
