@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import {
   Box, Card, CardContent, Typography, Grid, TextField, Button,
   MenuItem, Table, TableBody, TableCell, TableHead, TableRow,
-  Tabs, Tab, Chip, InputAdornment, Alert, Snackbar, Stack,
+  Tabs, Tab, Chip, InputAdornment, Alert, Snackbar, Stack, alpha,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
@@ -105,7 +105,12 @@ export default function InvocationInitiation() {
 
       <Tabs
         value={tab} onChange={(_, v) => setTab(v)}
-        sx={{ mb: 2.5, "& .MuiTabs-indicator": { height: 3, borderRadius: 2 } }}
+        sx={{
+          mb: 2.5,
+          "& .MuiTabs-indicator": { height: 3, borderRadius: 2 },
+          "& .MuiTab-root": { minHeight: 50, borderRadius: 2.5 },
+          "& .Mui-selected": { bgcolor: alpha("#dbeafe", 0.68) },
+        }}
       >
         <Tab icon={<AddIcon fontSize="small" />} iconPosition="start" label="New Request" sx={{ textTransform: "none", fontWeight: 600 }} />
         <Tab
@@ -122,8 +127,11 @@ export default function InvocationInitiation() {
       </Tabs>
 
       {tab === 0 && (
-        <Card>
+        <Card sx={{ overflow: "hidden" }}>
           <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+            <Alert severity="info" sx={{ mb: 2.5 }}>
+              Build a sample case quickly, then move it through Maker, Checker, and Risk to demonstrate the full operational story.
+            </Alert>
 
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ mb: 3 }}>
               <Button
@@ -228,9 +236,10 @@ export default function InvocationInitiation() {
 
             {value > 0 && (
               <Box sx={{
-                mt: 3, p: 2, borderRadius: 2,
-                background: "linear-gradient(135deg, #eff6ff, #dbeafe)",
+                mt: 3, p: 2.25, borderRadius: 3,
+                background: "radial-gradient(circle at top right, rgba(59,130,246,0.12), transparent 28%), linear-gradient(135deg, #eff6ff, #dbeafe)",
                 border: "1px solid #bfdbfe",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.85)",
               }}>
                 <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
                   <Box>
@@ -249,7 +258,7 @@ export default function InvocationInitiation() {
               </Box>
             )}
 
-            <Stack direction="row" spacing={1.5} sx={{ mt: 3 }}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ mt: 3 }}>
               <Button variant="contained" startIcon={<SendIcon />} disabled={!valid} onClick={handleSubmit} size="large">
                 Submit Invocation Request
               </Button>

@@ -122,13 +122,14 @@ export default function Dashboard() {
       <Card
         sx={{
           mb: 3,
-          background: "radial-gradient(circle at 80% 20%, rgba(245,158,11,0.28), transparent 28%), linear-gradient(135deg, #07111f 0%, #10213f 48%, #123f57 100%)",
+          background: "radial-gradient(circle at 82% 18%, rgba(251,191,36,0.32), transparent 26%), radial-gradient(circle at 12% 86%, rgba(59,130,246,0.18), transparent 22%), linear-gradient(135deg, #07111f 0%, #10213f 48%, #123f57 100%)",
           color: "white",
           overflow: "hidden",
           position: "relative",
         }}
       >
         <Box sx={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)", backgroundSize: "48px 48px", opacity: 0.18 }} />
+        <Box sx={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(255,255,255,0.04), transparent 40%, rgba(255,255,255,0.03))" }} />
         <CardContent sx={{ p: { xs: 2.5, md: 4 }, position: "relative" }}>
           <Grid container spacing={3} alignItems="center">
             <Grid size={{ xs: 12, md: 7 }}>
@@ -147,13 +148,13 @@ export default function Dashboard() {
                 <Button variant="contained" color="secondary" onClick={() => navigate("/initiate")} endIcon={<ArrowForwardIcon />}>
                   Start a request
                 </Button>
-                <Button variant="outlined" onClick={() => navigate("/risk")} sx={{ color: "white", borderColor: alpha("#fff", 0.35) }}>
+                <Button variant="outlined" onClick={() => navigate("/risk")} sx={{ color: "white", borderColor: alpha("#fff", 0.35), backdropFilter: "blur(8px)" }}>
                   Review risk queue
                 </Button>
               </Stack>
             </Grid>
             <Grid size={{ xs: 12, md: 5 }}>
-              <Card sx={{ bgcolor: alpha("#fff", 0.09), border: "1px solid rgba(255,255,255,0.16)", color: "white", boxShadow: "none" }}>
+              <Card sx={{ bgcolor: alpha("#fff", 0.09), border: "1px solid rgba(255,255,255,0.16)", color: "white", boxShadow: "none", backdropFilter: "blur(14px)" }}>
                 <CardContent>
                   <Stack spacing={2}>
                     {[
@@ -187,7 +188,7 @@ export default function Dashboard() {
           const Icon = item.icon;
           return (
             <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={item.label}>
-              <Card sx={{ height: "100%", position: "relative", overflow: "hidden" }}>
+              <Card sx={{ height: "100%", position: "relative", overflow: "hidden", transition: "transform 0.18s ease, box-shadow 0.18s ease", "&:hover": { transform: "translateY(-3px)" } }}>
                 <Box sx={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${alpha(item.color, 0.09)}, transparent 58%)` }} />
                 <CardContent sx={{ position: "relative" }}>
                   <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
@@ -314,7 +315,7 @@ export default function Dashboard() {
                   />
                 </Grid>
               </Grid>
-              <Box sx={{ mt: 2.5, p: 2, borderRadius: 3, bgcolor: suggestedBand.bg, border: `1px solid ${alpha(suggestedBand.color, 0.28)}` }}>
+              <Box sx={{ mt: 2.5, p: 2.25, borderRadius: 3.5, bgcolor: suggestedBand.bg, border: `1px solid ${alpha(suggestedBand.color, 0.28)}`, boxShadow: `inset 0 1px 0 ${alpha("#fff", 0.75)}` }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
                   <Typography variant="caption" color="text.secondary">Post-haircut collateral</Typography>
                   <Chip label={suggestedBand.label} size="small" sx={{ bgcolor: "white", color: suggestedBand.color, fontWeight: 800 }} />
@@ -339,9 +340,9 @@ export default function Dashboard() {
                     <Box
                       onClick={() => navigate(step.path)}
                       sx={{
-                        p: 2,
+                        p: 2.1,
                         height: "100%",
-                        borderRadius: 3,
+                        borderRadius: 3.5,
                         border: "1px solid #e2e8f0",
                         cursor: "pointer",
                         transition: "all 0.18s ease",

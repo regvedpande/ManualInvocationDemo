@@ -17,6 +17,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 
 const DRAWER_WIDTH = 256;
+const sidebarBg = "radial-gradient(circle at top, rgba(251,191,36,0.12), transparent 18%), linear-gradient(168deg, #0b1220 0%, #13284c 56%, #102952 100%)";
 
 const navItems = [
   {
@@ -60,9 +61,9 @@ function SidebarContent({ navigate, location, onClose, badges }) {
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
           <Box sx={{
             width: 40, height: 40, borderRadius: 2.5,
-            background: "linear-gradient(135deg, #f59e0b, #fbbf24)",
+            background: "linear-gradient(135deg, #f59e0b, #fde68a)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 4px 12px rgba(245,158,11,0.4)",
+            boxShadow: "0 12px 28px -12px rgba(245,158,11,0.85)",
           }}>
             <Typography sx={{ fontWeight: 900, color: "#1e40af", fontSize: 15 }}>AW</Typography>
           </Box>
@@ -76,8 +77,9 @@ function SidebarContent({ navigate, location, onClose, badges }) {
 
         {/* Workflow indicator */}
         <Box sx={{
-          bgcolor: alpha("#fff", 0.07), borderRadius: 2, p: 1.5,
+          bgcolor: alpha("#fff", 0.07), borderRadius: 3, p: 1.5,
           border: `1px solid ${alpha("#fff", 0.1)}`,
+          boxShadow: `inset 0 1px 0 ${alpha("#fff", 0.06)}`,
         }}>
           <Typography sx={{ color: alpha("#fff", 0.5), fontSize: 10, fontWeight: 700, letterSpacing: 1, mb: 1 }}>
             WORKFLOW
@@ -115,12 +117,12 @@ function SidebarContent({ navigate, location, onClose, badges }) {
               <ListItemButton
                 onClick={() => { navigate(item.path); onClose?.(); }}
                 sx={{
-                  borderRadius: 2.5,
+                  borderRadius: 3,
                   bgcolor: active ? alpha("#fff", 0.12) : "transparent",
-                  border: active ? `1px solid ${alpha("#fff", 0.15)}` : "1px solid transparent",
-                  "&:hover": { bgcolor: alpha("#fff", 0.08) },
+                  border: active ? `1px solid ${alpha("#fff", 0.16)}` : "1px solid transparent",
+                  "&:hover": { bgcolor: alpha("#fff", 0.08), transform: "translateX(2px)" },
                   py: 1.2, px: 1.5,
-                  transition: "all 0.15s ease",
+                  transition: "all 0.18s ease",
                 }}
               >
                 <ListItemIcon sx={{
@@ -164,7 +166,8 @@ function SidebarContent({ navigate, location, onClose, badges }) {
       <Box sx={{ p: 2 }}>
         <Box sx={{
           display: "flex", alignItems: "center", gap: 1.5,
-          bgcolor: alpha("#fff", 0.07), borderRadius: 2.5, p: 1.5,
+          bgcolor: alpha("#fff", 0.07), borderRadius: 3, p: 1.5,
+          border: `1px solid ${alpha("#fff", 0.1)}`,
         }}>
           <Avatar sx={{ width: 34, height: 34, bgcolor: "#f59e0b", fontSize: 13, fontWeight: 700 }}>AM</Avatar>
           <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -197,8 +200,6 @@ export default function Layout({ children }) {
 
   const currentNav = navItems.find((n) => n.path === location.pathname) || navItems[0];
 
-  const sidebarBg = "linear-gradient(160deg, #0f172a 0%, #1e3a8a 100%)";
-
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}>
       {/* Desktop Sidebar */}
@@ -210,7 +211,7 @@ export default function Layout({ children }) {
             "& .MuiDrawer-paper": {
               width: DRAWER_WIDTH, boxSizing: "border-box",
               background: sidebarBg, borderRight: "none",
-              boxShadow: "4px 0 24px rgba(0,0,0,0.15)",
+              boxShadow: "12px 0 32px -22px rgba(15,23,42,0.9)",
             },
           }}
         >
@@ -241,8 +242,8 @@ export default function Layout({ children }) {
           position="sticky"
           elevation={0}
           sx={{
-            bgcolor: "white",
-            borderBottom: "1px solid #e2e8f0",
+            bgcolor: alpha("#ffffff", 0.78),
+            borderBottom: "1px solid rgba(148,163,184,0.18)",
             zIndex: 100,
           }}
         >
@@ -267,8 +268,8 @@ export default function Layout({ children }) {
                 label="Product Sandbox"
                 size="small"
                 sx={{
-                  bgcolor: "#eff6ff", color: "#1e40af", fontWeight: 700,
-                  border: "1px solid #bfdbfe", fontSize: 11,
+                  bgcolor: "rgba(239,246,255,0.85)", color: "#1e40af", fontWeight: 700,
+                  border: "1px solid rgba(147,197,253,0.7)", fontSize: 11,
                   display: { xs: "none", sm: "flex" },
                 }}
               />
@@ -279,7 +280,14 @@ export default function Layout({ children }) {
         </AppBar>
 
         {/* Page content */}
-        <Box sx={{ flex: 1, overflow: "auto", p: { xs: 2, sm: 3 }, width: "100%", boxSizing: "border-box" }}>
+        <Box sx={{
+          flex: 1,
+          overflow: "auto",
+          p: { xs: 2, sm: 3 },
+          width: "100%",
+          boxSizing: "border-box",
+          background: "radial-gradient(circle at top right, rgba(191,219,254,0.26), transparent 22%), linear-gradient(180deg, rgba(255,255,255,0.32), rgba(255,255,255,0))",
+        }}>
           {children}
         </Box>
       </Box>

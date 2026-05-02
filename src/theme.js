@@ -8,13 +8,13 @@ const theme = createTheme({
     error:      { main: "#dc2626", light: "#f87171", dark: "#991b1b" },
     warning:    { main: "#d97706", light: "#fbbf24", dark: "#92400e" },
     info:       { main: "#0284c7", light: "#38bdf8", dark: "#075985" },
-    background: { default: "#f1f5f9", paper: "#ffffff" },
+    background: { default: "#edf3fb", paper: "#ffffff" },
     text:       { primary: "#0f172a", secondary: "#64748b" },
   },
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", sans-serif',
-    h4: { fontWeight: 800, letterSpacing: "-0.5px" },
-    h5: { fontWeight: 700, letterSpacing: "-0.3px" },
+    h4: { fontWeight: 800, letterSpacing: "-0.7px" },
+    h5: { fontWeight: 700, letterSpacing: "-0.35px" },
     h6: { fontWeight: 700 },
     subtitle1: { fontWeight: 600 },
     subtitle2: { fontWeight: 600 },
@@ -34,9 +34,10 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 16,
-          boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
-          border: "1px solid rgba(0,0,0,0.05)",
+          borderRadius: 20,
+          boxShadow: "0 18px 40px -24px rgba(15,23,42,0.28), 0 8px 20px -16px rgba(15,23,42,0.18)",
+          border: "1px solid rgba(148,163,184,0.16)",
+          backdropFilter: "blur(10px)",
         },
       },
     },
@@ -44,14 +45,19 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: "none",
-          borderRadius: 10,
-          fontWeight: 600,
+          borderRadius: 12,
+          fontWeight: 700,
           fontSize: "0.875rem",
           boxShadow: "none",
-          "&:hover": { boxShadow: "none" },
+          transition: "transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease",
+          "&:hover": { boxShadow: "none", transform: "translateY(-1px)" },
         },
         containedPrimary: {
-          background: "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)",
+          background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)",
+        },
+        containedSecondary: {
+          background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+          color: "#111827",
         },
       },
     },
@@ -89,9 +95,30 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           "& .MuiOutlinedInput-root": {
-            borderRadius: 10,
-            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#3b82f6" },
+            borderRadius: 12,
+            backgroundColor: "rgba(255,255,255,0.84)",
+            transition: "box-shadow 0.18s ease, border-color 0.18s ease, background-color 0.18s ease",
+            "&:hover": {
+              backgroundColor: "#fff",
+              boxShadow: "0 8px 24px -20px rgba(37,99,235,0.8)",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#60a5fa" },
+            "&.Mui-focused": {
+              backgroundColor: "#fff",
+              boxShadow: "0 16px 34px -24px rgba(37,99,235,0.9)",
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderWidth: 1.5,
+              borderColor: "#3b82f6",
+            },
           },
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backdropFilter: "blur(18px)",
         },
       },
     },
