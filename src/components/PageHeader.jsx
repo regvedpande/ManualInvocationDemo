@@ -7,9 +7,9 @@ export default function PageHeader({ icon, title, subtitle, color = "#1e40af" })
     <Box sx={{
       display: "flex", alignItems: "center", gap: 2, mb: 3,
       p: { xs: 2.25, sm: 2.75 }, borderRadius: 4,
-      background: `radial-gradient(circle at top right, ${alpha(color, 0.12)}, transparent 28%), linear-gradient(135deg, ${alpha(color, 0.08)} 0%, ${alpha(color, 0.03)} 100%)`,
-      border: `1px solid ${alpha(color, 0.12)}`,
-      boxShadow: `0 18px 40px -32px ${alpha(color, 0.45)}`,
+      background: `radial-gradient(circle at top right, ${alpha(color, 0.14)}, transparent 30%), linear-gradient(135deg, ${alpha(color, 0.07)} 0%, ${alpha(color, 0.02)} 100%)`,
+      border: `1px solid ${alpha(color, 0.14)}`,
+      boxShadow: `0 18px 40px -32px ${alpha(color, 0.45)}, inset 0 1px 0 rgba(255,255,255,0.7)`,
     }}>
       <Box sx={{
         width: 48, height: 48, borderRadius: 2.5, flexShrink: 0,

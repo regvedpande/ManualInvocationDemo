@@ -120,6 +120,7 @@ function SidebarContent({ navigate, location, onClose, badges }) {
                   borderRadius: 3,
                   bgcolor: active ? alpha("#fff", 0.12) : "transparent",
                   border: active ? `1px solid ${alpha("#fff", 0.16)}` : "1px solid transparent",
+                  borderLeft: active ? `3px solid #fbbf24` : `3px solid transparent`,
                   "&:hover": { bgcolor: alpha("#fff", 0.08), transform: "translateX(2px)" },
                   py: 1.2, px: 1.5,
                   transition: "all 0.18s ease",
@@ -242,8 +243,9 @@ export default function Layout({ children }) {
           position="sticky"
           elevation={0}
           sx={{
-            bgcolor: alpha("#ffffff", 0.78),
-            borderBottom: "1px solid rgba(148,163,184,0.18)",
+            bgcolor: alpha("#ffffff", 0.92),
+            borderBottom: "1px solid rgba(148,163,184,0.2)",
+            boxShadow: "0 2px 20px -8px rgba(15,23,42,0.1)",
             zIndex: 100,
           }}
         >

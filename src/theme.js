@@ -35,9 +35,13 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 20,
-          boxShadow: "0 18px 40px -24px rgba(15,23,42,0.28), 0 8px 20px -16px rgba(15,23,42,0.18)",
-          border: "1px solid rgba(148,163,184,0.16)",
+          boxShadow: "0 12px 32px -20px rgba(15,23,42,0.22), 0 4px 12px -8px rgba(15,23,42,0.1)",
+          border: "1px solid rgba(148,163,184,0.18)",
           backdropFilter: "blur(10px)",
+          transition: "box-shadow 0.2s ease",
+          "&:hover": {
+            boxShadow: "0 20px 40px -20px rgba(15,23,42,0.28), 0 8px 20px -10px rgba(15,23,42,0.12)",
+          },
         },
       },
     },
@@ -85,7 +89,8 @@ const theme = createTheme({
     MuiTableRow: {
       styleOverrides: {
         root: {
-          "&:hover": { backgroundColor: "#f8fafc" },
+          transition: "background-color 0.14s ease",
+          "&:hover": { backgroundColor: "rgba(239,246,255,0.72)" },
           "&:last-child td": { borderBottom: 0 },
         },
       },

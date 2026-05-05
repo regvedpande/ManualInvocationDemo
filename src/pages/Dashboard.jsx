@@ -137,12 +137,11 @@ export default function Dashboard() {
                 label="Wealth operations control tower"
                 sx={{ mb: 2, bgcolor: alpha("#fbbf24", 0.16), color: "#fde68a", border: "1px solid rgba(251,191,36,0.28)", fontWeight: 800 }}
               />
-              <Typography variant="h4" sx={{ color: "white", fontSize: { xs: 28, md: 42 }, lineHeight: 1.05, mb: 1.5 }}>
-                Pledged securities invocation with maker-checker controls, risk scoring, and demat readiness.
+              <Typography variant="h4" sx={{ color: "white", fontSize: { xs: 26, md: 38 }, lineHeight: 1.1, mb: 1.5 }}>
+                Collateral invocation with maker-checker controls, risk scoring, and demat readiness.
               </Typography>
-              <Typography sx={{ color: alpha("#fff", 0.72), maxWidth: 760, lineHeight: 1.7, mb: 2.5 }}>
-                Explore a synthetic wealth-management workflow that models collateral operations for loan-against-securities portfolios.
-                Every stage is interactive, so reviewers can submit a request, move it through approvals, and inspect how exposure changes.
+              <Typography sx={{ color: alpha("#fff", 0.72), maxWidth: 680, lineHeight: 1.7, mb: 2.5 }}>
+                A synthetic wealth-management workflow for loan-against-securities portfolios. Submit requests, move them through approvals, and watch exposure update at every stage.
               </Typography>
               <Stack direction="row" flexWrap="wrap" gap={1}>
                 <Button variant="contained" color="secondary" onClick={() => navigate("/initiate")} endIcon={<ArrowForwardIcon />}>
@@ -189,15 +188,16 @@ export default function Dashboard() {
           return (
             <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={item.label}>
               <Card sx={{ height: "100%", position: "relative", overflow: "hidden", transition: "transform 0.18s ease, box-shadow 0.18s ease", "&:hover": { transform: "translateY(-3px)" } }}>
-                <Box sx={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${alpha(item.color, 0.09)}, transparent 58%)` }} />
-                <CardContent sx={{ position: "relative" }}>
-                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
-                    <Box sx={{ width: 42, height: 42, borderRadius: 2.5, bgcolor: alpha(item.color, 0.12), display: "grid", placeItems: "center" }}>
-                      <Icon sx={{ color: item.color }} />
-                    </Box>
+                <Box sx={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${alpha(item.color, 0.08)}, transparent 55%)` }} />
+                <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${item.color}, ${alpha(item.color, 0.3)})`, borderRadius: "20px 20px 0 0" }} />
+                <CardContent sx={{ position: "relative", pt: 2.5 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.5 }}>
                     <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.8 }}>
                       {item.label}
                     </Typography>
+                    <Box sx={{ width: 36, height: 36, borderRadius: 2, bgcolor: alpha(item.color, 0.1), display: "grid", placeItems: "center", flexShrink: 0 }}>
+                      <Icon sx={{ color: item.color, fontSize: 20 }} />
+                    </Box>
                   </Stack>
                   <Typography variant="h5" sx={{ fontWeight: 900, color: item.color, mb: 0.4 }}>{item.value}</Typography>
                   <Typography variant="body2" color="text.secondary">{item.detail}</Typography>
