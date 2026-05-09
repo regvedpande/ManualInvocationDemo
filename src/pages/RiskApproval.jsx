@@ -140,8 +140,6 @@ export default function RiskApproval() {
         </CardContent>
       </Card>
 
-
-
       {/* Stats row */}
       <Stack direction="row" spacing={1.5} sx={{ mb: 2.5 }} flexWrap="wrap">
         <Chip label={`${filtered.length} Pending`} sx={{ bgcolor: "#f0f9ff", color: "#0369a1", border: "1px solid #bae6fd", fontWeight: 700 }} />
