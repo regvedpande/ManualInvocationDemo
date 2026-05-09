@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import {
   Box, Card, CardContent, Typography, Grid, TextField, Button,
   MenuItem, Table, TableBody, TableCell, TableHead, TableRow,
-  Tabs, Tab, Chip, InputAdornment, Alert, Snackbar, Stack, alpha,
+  Tabs, Tab, Chip, InputAdornment, Alert, Snackbar, Stack, alpha, Divider,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
@@ -51,6 +51,17 @@ const LabelledField = ({ label, children }) => (
     </Typography>
     {children}
   </Box>
+);
+
+const SectionLabel = ({ children }) => (
+  <Grid size={{ xs: 12 }}>
+    <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mt: 1, mb: 0.5 }}>
+      <Typography sx={{ fontSize: 10.5, fontWeight: 800, color: "text.disabled", letterSpacing: 1, textTransform: "uppercase", whiteSpace: "nowrap" }}>
+        {children}
+      </Typography>
+      <Divider sx={{ flex: 1 }} />
+    </Stack>
+  </Grid>
 );
 
 export default function InvocationInitiation() {
@@ -150,6 +161,7 @@ export default function InvocationInitiation() {
               />
             </Stack>
             <Grid container spacing={2.5}>
+              <SectionLabel>Counterparty</SectionLabel>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <LabelledField label="Client Name *">
                   <TextField select fullWidth name="clientName" value={form.clientName} onChange={handleChange} placeholder="Select client">
@@ -162,6 +174,8 @@ export default function InvocationInitiation() {
                   <TextField fullWidth name="pan" value={form.pan} onChange={handleChange} placeholder="ABCDE1234F" inputProps={{ maxLength: 10, style: { textTransform: "uppercase" } }} />
                 </LabelledField>
               </Grid>
+
+              <SectionLabel>Security Details</SectionLabel>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <LabelledField label="Scrip Name *">
                   <TextField select fullWidth name="scripName" value={form.scripName} onChange={handleChange} placeholder="Select scrip">
@@ -188,6 +202,8 @@ export default function InvocationInitiation() {
                   />
                 </LabelledField>
               </Grid>
+
+              <SectionLabel>Financing</SectionLabel>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <LabelledField label="Loan Code *">
                   <TextField fullWidth name="loanCode" value={form.loanCode} onChange={handleChange} placeholder="e.g. LC-9901" />
@@ -206,6 +222,8 @@ export default function InvocationInitiation() {
                   <TextField fullWidth name="utr" value={form.utr} onChange={handleChange} placeholder="e.g. UTR20250401001" />
                 </LabelledField>
               </Grid>
+
+              <SectionLabel>Pledge Identifiers</SectionLabel>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                 <LabelledField label="Pledger DP ID">
                   <TextField fullWidth name="pledgerDpId" value={form.pledgerDpId} onChange={handleChange} />

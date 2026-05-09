@@ -110,6 +110,9 @@ function SidebarContent({ navigate, location, onClose, badges }) {
 
       {/* Nav Items */}
       <List sx={{ px: 1.5, pt: 1.5, flex: 1 }}>
+        <Typography sx={{ color: alpha("#fff", 0.28), fontSize: 9.5, fontWeight: 800, letterSpacing: 1.2, px: 1.5, mb: 0.75, textTransform: "uppercase" }}>
+          Modules
+        </Typography>
         {navItems.map((item) => {
           const active = location.pathname === item.path;
           return (
@@ -122,12 +125,12 @@ function SidebarContent({ navigate, location, onClose, badges }) {
                   border: active ? `1px solid ${alpha("#fff", 0.16)}` : "1px solid transparent",
                   borderLeft: active ? `3px solid #fbbf24` : `3px solid transparent`,
                   "&:hover": { bgcolor: alpha("#fff", 0.08), transform: "translateX(2px)" },
-                  py: 1.2, px: 1.5,
+                  py: 1.1, px: 1.5,
                   transition: "all 0.18s ease",
                 }}
               >
                 <ListItemIcon sx={{
-                  color: active ? "#fbbf24" : alpha("#fff", 0.55),
+                  color: active ? "#fbbf24" : alpha("#fff", 0.5),
                   minWidth: 34,
                 }}>
                   {item.badgeKey ? (
@@ -145,15 +148,16 @@ function SidebarContent({ navigate, location, onClose, badges }) {
                   secondary={item.desc}
                   primaryTypographyProps={{
                     fontSize: 13.5, fontWeight: active ? 700 : 500,
-                    color: active ? "white" : alpha("#fff", 0.85),
+                    color: active ? "white" : alpha("#fff", 0.82),
                   }}
                   secondaryTypographyProps={{
-                    fontSize: 10.5, color: alpha("#fff", 0.4),
-                    sx: { display: active ? "block" : "none" },
+                    fontSize: 10.5,
+                    color: active ? alpha("#fff", 0.5) : alpha("#fff", 0.28),
+                    sx: { display: "block", mt: 0.1 },
                   }}
                 />
                 {active && (
-                  <Box sx={{ width: 4, height: 4, borderRadius: "50%", bgcolor: "#fbbf24" }} />
+                  <Box sx={{ width: 5, height: 5, borderRadius: "50%", bgcolor: "#fbbf24", flexShrink: 0 }} />
                 )}
               </ListItemButton>
             </ListItem>

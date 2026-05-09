@@ -158,7 +158,7 @@ export default function Dashboard() {
                   <Stack spacing={2}>
                     {[
                       { label: "Largest single exposure", value: fmt(largestExposure), icon: TrendingUpIcon },
-                      { label: "SLA posture", value: pendingCount <= 6 ? "Healthy" : "Attention", icon: SpeedIcon },
+                      { label: "Approval completion rate", value: `${completionRate}%`, icon: SpeedIcon },
                       { label: "Risk model", value: "LTV + concentration + product rules", icon: HealthAndSafetyIcon },
                     ].map((item) => {
                       const Icon = item.icon;
@@ -214,7 +214,19 @@ export default function Dashboard() {
             <CardContent>
               <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={1} sx={{ mb: 2 }}>
                 <Box>
-                  <Typography variant="subtitle1">Operations Pulse</Typography>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Typography variant="subtitle1">Operations Pulse</Typography>
+                    <Box sx={{
+                      width: 7, height: 7, borderRadius: "50%", bgcolor: "#22c55e", flexShrink: 0,
+                      boxShadow: "0 0 0 0 rgba(34,197,94,0.6)",
+                      animation: "pulse 2s infinite",
+                      "@keyframes pulse": {
+                        "0%": { boxShadow: "0 0 0 0 rgba(34,197,94,0.5)" },
+                        "70%": { boxShadow: "0 0 0 6px rgba(34,197,94,0)" },
+                        "100%": { boxShadow: "0 0 0 0 rgba(34,197,94,0)" },
+                      },
+                    }} />
+                  </Stack>
                   <Typography variant="caption" color="text.secondary">Requests by submission date with live in-memory state</Typography>
                 </Box>
                 <Chip label={`${stats.total} total requests`} variant="outlined" />
@@ -241,17 +253,25 @@ export default function Dashboard() {
         <Grid size={{ xs: 12, lg: 5 }}>
           <Card sx={{ height: "100%" }}>
             <CardContent>
-              <Typography variant="subtitle1">Control Queue Mix</Typography>
-              <Typography variant="caption" color="text.secondary">Distribution across workflow states</Typography>
+              <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                <Box>
+                  <Typography variant="subtitle1">Control Queue Mix</Typography>
+                  <Typography variant="caption" color="text.secondary">Distribution across workflow states</Typography>
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 900, color: "text.primary", lineHeight: 1 }}>{stats.total}</Typography>
+              </Stack>
               <Stack spacing={1.8} sx={{ mt: 2.5 }}>
                 {statusData.map((item) => (
                   <Box key={item.label}>
                     <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.6 }}>
-                      <Typography variant="caption" sx={{ fontWeight: 700 }}>{item.label}</Typography>
+                      <Stack direction="row" alignItems="center" spacing={0.75}>
+                        <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: item.color, flexShrink: 0 }} />
+                        <Typography variant="caption" sx={{ fontWeight: 700 }}>{item.label}</Typography>
+                      </Stack>
                       <Typography variant="caption" color="text.secondary">{item.value} · {item.pct}%</Typography>
                     </Stack>
-                    <Box sx={{ height: 9, bgcolor: "#f1f5f9", borderRadius: 6, overflow: "hidden" }}>
-                      <Box sx={{ height: "100%", width: `${item.pct}%`, minWidth: item.value ? 12 : 0, bgcolor: item.color, borderRadius: 6 }} />
+                    <Box sx={{ height: 8, bgcolor: "#f1f5f9", borderRadius: 6, overflow: "hidden" }}>
+                      <Box sx={{ height: "100%", width: `${item.pct}%`, minWidth: item.value ? 12 : 0, bgcolor: item.color, borderRadius: 6, transition: "width 0.4s ease" }} />
                     </Box>
                   </Box>
                 ))}

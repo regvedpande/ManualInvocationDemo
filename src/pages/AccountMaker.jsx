@@ -64,8 +64,6 @@ export default function AccountMaker() {
         color="#d97706"
       />
 
-
-
       <Card>
         <CardContent>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ sm: "center" }} sx={{ mb: 2 }}>
