@@ -37,7 +37,7 @@ const riskBand = (score) =>
                { label: "High Risk",   color: "#dc2626", bg: "#fef2f2", border: "#fecaca" };
 
 export default function RiskApproval() {
-  const { pendingRisk, approved, rejected, updateStatus } = useContext(AppContext);
+  const { pendingRisk, updateStatus } = useContext(AppContext);
   const [search, setSearch] = useState("");
   const [autoMode, setAutoMode] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -78,6 +78,12 @@ export default function RiskApproval() {
       : "No low-risk requests to auto-approve right now"
     );
   };
+
+  const highRiskCount = filtered.filter((row) => riskScore(row) >= 72).length;
+  const avgRiskScore = filtered.length
+    ? Math.round(filtered.reduce((sum, row) => sum + riskScore(row), 0) / filtered.length)
+    : 0;
+  const totalRiskExposure = filtered.reduce((sum, row) => sum + row.quantity * row.cmp, 0);
 
   return (
     <Box>
@@ -141,11 +147,25 @@ export default function RiskApproval() {
       </Card>
 
       {/* Stats row */}
-      <Stack direction="row" spacing={1.5} sx={{ mb: 2.5 }} flexWrap="wrap">
-        <Chip label={`${filtered.length} Pending`} sx={{ bgcolor: "#f0f9ff", color: "#0369a1", border: "1px solid #bae6fd", fontWeight: 700 }} />
-        <Chip label={`${approved.length} Approved`} sx={{ bgcolor: "#f0fdf4", color: "#059669", border: "1px solid #bbf7d0", fontWeight: 700 }} />
-        <Chip label={`${rejected.length} Rejected`} sx={{ bgcolor: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca", fontWeight: 700 }} />
-      </Stack>
+      <Grid container spacing={1.5} sx={{ mb: 2.5 }}>
+        {[
+          { label: "Pending", value: filtered.length, tone: "#0369a1", bg: "#f0f9ff", border: "#bae6fd" },
+          { label: "High Risk", value: highRiskCount, tone: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
+          { label: "Average Score", value: avgRiskScore || "—", tone: "#7c3aed", bg: "#f5f3ff", border: "#ddd6fe" },
+          { label: "Risk Exposure", value: `₹${totalRiskExposure.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`, tone: "#0f766e", bg: "#ecfdf5", border: "#a7f3d0" },
+        ].map((item) => (
+          <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={item.label}>
+            <Box sx={{ p: 1.6, borderRadius: 3, bgcolor: item.bg, border: `1px solid ${item.border}` }}>
+              <Typography variant="caption" sx={{ color: item.tone, fontWeight: 800, textTransform: "uppercase", letterSpacing: 0.7 }}>
+                {item.label}
+              </Typography>
+              <Typography variant="h6" sx={{ mt: 0.3, color: item.tone, fontWeight: 900, lineHeight: 1.1 }}>
+                {item.value}
+              </Typography>
+            </Box>
+          </Grid>
+        ))}
+      </Grid>
 
       <Card sx={{ mb: 3 }}>
         <CardContent>

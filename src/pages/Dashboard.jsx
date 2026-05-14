@@ -55,6 +55,12 @@ export default function Dashboard() {
   const completionRate = Math.round((stats.approved / Math.max(stats.total, 1)) * 100);
   const exceptionRate = Math.round((stats.rejected / Math.max(stats.total, 1)) * 100);
   const highValueCount = invocations.filter((row) => getRequestValue(row) > 750000).length;
+  const avgExposure = Math.round(stats.totalValue / Math.max(stats.total, 1));
+  const actionItems = [
+    { label: "Maker backlog", value: stats.pendingMaker, path: "/maker", tone: "#d97706" },
+    { label: "Checker backlog", value: stats.pendingChecker, path: "/checker", tone: "#7c3aed" },
+    { label: "Risk decisions", value: stats.pendingRisk, path: "/risk", tone: "#0369a1" },
+  ];
 
   const dailyData = useMemo(() => {
     const byDate = invocations.reduce((acc, row) => {
@@ -114,6 +120,13 @@ export default function Dashboard() {
       detail: `${highValueCount} high-value requests flagged`,
       icon: ShieldOutlinedIcon,
       color: "#dc2626",
+    },
+    {
+      label: "Average Exposure",
+      value: fmt(avgExposure),
+      detail: "Mean request size across the current book",
+      icon: TrendingUpIcon,
+      color: "#0f766e",
     },
   ];
 
@@ -186,7 +199,7 @@ export default function Dashboard() {
         {executiveCards.map((item) => {
           const Icon = item.icon;
           return (
-            <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={item.label}>
+            <Grid size={{ xs: 12, sm: 6, lg: 4, xl: 4 }} key={item.label}>
               <Card sx={{ height: "100%", position: "relative", overflow: "hidden", transition: "transform 0.18s ease, box-shadow 0.18s ease", "&:hover": { transform: "translateY(-3px)" } }}>
                 <Box sx={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${alpha(item.color, 0.08)}, transparent 55%)` }} />
                 <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${item.color}, ${alpha(item.color, 0.3)})`, borderRadius: "20px 20px 0 0" }} />
@@ -207,6 +220,39 @@ export default function Dashboard() {
           );
         })}
       </Grid>
+
+      <Card sx={{ mb: 3, overflow: "hidden" }}>
+        <CardContent sx={{ pb: "20px !important" }}>
+          <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems={{ md: "center" }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="subtitle1">Action Center</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Jump directly to the queues that need operator attention.
+              </Typography>
+            </Box>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.2} sx={{ width: { xs: "100%", md: "auto" } }}>
+              {actionItems.map((item) => (
+                <Button
+                  key={item.label}
+                  variant="outlined"
+                  onClick={() => navigate(item.path)}
+                  sx={{
+                    justifyContent: "space-between",
+                    px: 1.6,
+                    borderColor: alpha(item.tone, 0.22),
+                    color: item.tone,
+                    bgcolor: alpha(item.tone, 0.04),
+                    minWidth: { sm: 180 },
+                  }}
+                  endIcon={<ArrowForwardIcon />}
+                >
+                  {item.label} · {item.value}
+                </Button>
+              ))}
+            </Stack>
+          </Stack>
+        </CardContent>
+      </Card>
 
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
         <Grid size={{ xs: 12, lg: 7 }}>
